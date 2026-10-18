@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bgCool = document.getElementById('bg-cool');
     const bgWarm = document.getElementById('bg-warm');
 
-    // ========== 1. ЧАСТИЦЫ НА CANVAS (ТОЛЬКО СНЕЖИНКИ И СЕРДЕЧКИ) ==========
+    // ========== 1. ЧАСТИЦЫ НА CANVAS (СНЕЖИНКИ И СЕРДЕЧКИ) ==========
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -32,28 +32,28 @@ document.addEventListener('DOMContentLoaded', () => {
         reset() {
             this.x = Math.random() * canvas.width;
             this.y = -40;
-            this.speedY = Math.random() * 1.2 + 0.4; // Чуть быстрее падают
+            this.speedY = Math.random() * 1.2 + 0.4;
             this.speedX = (Math.random() - 0.5) * 0.5;
             this.opacity = Math.random() * 0.5 + 0.3;
             this.rotation = Math.random() * 360;
             this.rotSpeed = (Math.random() - 0.5) * 1.5;
 
             if (isLoveMode) {
-                // Только сердечки
+                // Сердечки
                 this.emoji = ['❤️', '💖', '💕', '💗', '💓'][Math.floor(Math.random() * 5)];
                 this.size = Math.random() * 18 + 12;
             } else {
-                // ТОЛЬКО снежинки (без мусора и точек)
+                // Только снежинки
                 this.emoji = '❄️';
-                this.size = Math.random() * 14 + 8; // Разные размеры снежинок
-                this.opacity = Math.random() * 0.4 + 0.2; // Полупрозрачные, чтобы не мешали
+                this.size = Math.random() * 14 + 8;
+                this.opacity = Math.random() * 0.4 + 0.2;
             }
         }
         update() {
             this.y += this.speedY;
             this.x += this.speedX;
             this.rotation += this.rotSpeed;
-            // Снежинки плавно покачиваются из стороны в сторону
+            // Снежинки плавно покачиваются
             if (!isLoveMode) {
                 this.x += Math.sin(this.y / 30) * 0.5;
             }
@@ -80,21 +80,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     animateParticles();
 
-    // ========== 2. ПАРАЛЛАКС КАРТОЧКИ ==========
-    document.addEventListener('mousemove', (e) => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 2;
-        const y = (e.clientY / window.innerHeight - 0.5) * 2;
-        card.style.transform = `perspective(1000px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg)`;
-    });
-    document.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(1000px) rotateY(0) rotateX(0)';
-    });
+    // ========== 2. ПАРАЛЛАКС КАРТОЧКИ (ТОЛЬКО ДЛЯ ПК) ==========
+    // Проверяем, есть ли мышка. На телефонах эффект отключается, чтобы не ломался экран.
+    const isDesktop = window.matchMedia("(pointer: fine)").matches;
+
+    if (isDesktop) {
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 2;
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+            // Наклон уменьшен до 4 градусов для безопасности
+            card.style.transform = `perspective(1000px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
+        });
+        document.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateY(0) rotateX(0)';
+        });
+    }
 
     // ========== 3. ЗВУКОВЫЕ ЭФФЕКТЫ (WEB AUDIO API) ==========
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Безопасная инициализация аудио (нужно для iOS)
+    let audioCtx;
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {
+        console.log("Аудио не поддерживается");
+    }
     
-    // Приятный клик
     function playClickSound() {
+        if (!audioCtx) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -108,10 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(); osc.stop(audioCtx.currentTime + 0.1);
     }
 
-    // Волшебный звук при переходе
     function playTransitionSound() {
+        if (!audioCtx) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        const notes = [523.25, 659.25, 783.99, 1046.50]; // До, Ми, Соль, До
+        const notes = [523.25, 659.25, 783.99, 1046.50];
         notes.forEach((freq, i) => {
             setTimeout(() => {
                 const osc = audioCtx.createOscillator();
@@ -175,20 +187,17 @@ document.addEventListener('DOMContentLoaded', () => {
         qCounter.textContent = `Вопрос ${currentQuestion + 1} из ${testQuestions.length}`;
         
         const qData = testQuestions[currentQuestion];
-        answersDiv.innerHTML = ''; // Скрываем старые кнопки
+        answersDiv.innerHTML = ''; 
         
-        // Печатаем вопрос
         await typeText(qText, qData.question, 30);
 
-        // Создаем кнопки после того, как напечатался текст
         qData.answers.forEach((answer, index) => {
             const btn = document.createElement('button');
             btn.className = 'btn';
             btn.textContent = answer;
-            btn.style.opacity = '0'; // Изначально прозрачные
+            btn.style.opacity = '0';
             btn.style.transform = 'translateY(10px)';
             
-            // Плавное появление кнопок
             setTimeout(() => {
                 btn.style.transition = 'all 0.4s ease';
                 btn.style.opacity = '1';
@@ -209,20 +218,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ========== 6. ПЕРЕХОД В РОМАНТИЧНЫЙ РЕЖИМ ==========
     async function startLoveMode() {
-        // 1. Меняем фон и карточку
         bgCool.style.opacity = 0;
         bgWarm.style.opacity = 1;
         card.classList.add('love-mode');
 
-        // 2. Меняем частицы (теперь падают сердечки)
         isLoveMode = true;
         particles.forEach(p => p.reset()); 
         for (let i = 0; i < 20; i++) particles.push(new Particle());
 
-        // 3. Волшебный звук
         playTransitionSound();
 
-        // 4. Переключаем экраны
         screenTest.classList.remove('active');
         
         setTimeout(async () => {
@@ -230,10 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
 
-            // Печатаем вопрос на втором экране
             await typeText(document.getElementById('question'), "Ты будешь моей девушкой?", 50);
             
-            // Показываем кнопки
             const buttonsDiv = document.getElementById('buttons');
             buttonsDiv.style.opacity = '1';
         }, 400);
@@ -267,16 +270,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     yesBtn.addEventListener('click', () => {
-        // 1. Звук и вибрация
         playTransitionSound();
         if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
 
-        // 2. Меняем текст
         document.getElementById('question').textContent = "Я знал, что ты скажешь «Да»! 💖";
         message.textContent = "Ты сделала меня самым счастливым человеком на свете.";
         document.getElementById('buttons').style.display = 'none';
 
-        // 3. Включаем романтичную музыку (если файл есть)
         audioTest.pause();
         audioLove.volume = 0.4;
         audioLove.play().then(() => {
@@ -284,7 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
             musicToggle.textContent = '🔊';
         }).catch(() => console.log('Романтичная музыка не загружена'));
 
-        // 4. Салют
         launchConfetti();
     });
 
