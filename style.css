@@ -1,0 +1,165 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comfortaa', cursive;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.bg-layer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -2;
+    transition: opacity 1.5s ease-in-out;
+}
+
+#bg-cool {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); /* Красивый глубокий синий */
+    opacity: 1;
+}
+
+#bg-warm {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #a18cd1 100%);
+    background-size: 400% 400%;
+    animation: gradientMove 15s ease infinite;
+    opacity: 0;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+#particles {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    max-width: 520px;
+    width: 90%;
+    transition: transform 0.15s ease-out, background 0.8s, border 0.8s, box-shadow 0.8s;
+    transform-style: preserve-3d;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Светлая карточка для романтики */
+.card.love-mode {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 25px 60px rgba(161, 140, 209, 0.35);
+}
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+.progress-bar {
+    width: 100%; height: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px; margin-bottom: 30px; overflow: hidden;
+}
+.progress-fill {
+    height: 100%; background: #fff;
+    width: 0%; transition: width 0.4s ease;
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+#q-counter {
+    color: #a18cd1; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;
+}
+
+#q-text {
+    font-family: 'Comfortaa', cursive; font-size: 22px;
+    color: #fff; margin-bottom: 30px; line-height: 1.4;
+    min-height: 60px; /* Чтобы текст не прыгал при печати */
+}
+
+/* Эффект печатающегося текста */
+.typing::after {
+    content: '|';
+    animation: blink 0.8s infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.buttons {
+    display: flex; gap: 15px;
+    justify-content: center; flex-wrap: wrap; flex-direction: column;
+}
+
+.btn {
+    padding: 15px 30px; font-size: 16px; font-family: inherit; font-weight: 700;
+    border: none; border-radius: 15px; cursor: pointer;
+    transition: all 0.3s ease; background: rgba(255, 255, 255, 0.1);
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); text-align: left;
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateX(5px);
+}
+
+#buttons { flex-direction: row; margin-top: 20px; }
+
+.btn.yes {
+    background: linear-gradient(45deg, #ff4d6d, #ff9a3c);
+    color: white; border: none; border-radius: 50px;
+    text-align: center; box-shadow: 0 10px 30px rgba(255, 77, 109, 0.45);
+}
+.btn.yes:hover { transform: translateY(-4px) scale(1.06); }
+
+.btn.no {
+    background: rgba(255, 255, 255, 0.85);
+    color: #4a2c4a; border-radius: 50px; text-align: center;
+}
+
+.icon { animation: pulse 1.8s ease-in-out infinite; display: inline-block; filter: drop-shadow(0 0 18px rgba(255, 77, 109, 0.6)); }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+h1 {
+    font-family: 'Marck Script', cursive; color: #4a2c4a;
+    font-size: 34px; margin: 15px 0 25px; line-height: 1.3;
+    min-height: 45px;
+}
+
+.message { margin-top: 25px; font-size: 18px; color: #4a2c4a; min-height: 30px; font-weight: 700; }
+
+.music-toggle {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 52px; height: 52px; border-radius: 50%; border: none;
+    background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);
+    font-size: 24px; cursor: pointer; z-index: 100;
+    opacity: 0; pointer-events: none; transition: opacity 0.4s, transform 0.3s;
+}
+.music-toggle.visible { opacity: 1; pointer-events: auto; }
+.music-toggle:hover { transform: scale(1.1); }
+
+.confetti {
+    position: fixed; width: 10px; height: 10px;
+    border-radius: 2px; z-index: 200; pointer-events: none;
+}

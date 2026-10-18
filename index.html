@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест на совместимость 🔍</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Marck+Script&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="bg-layer" id="bg-cool"></div>
+    <div class="bg-layer" id="bg-warm"></div>
+    <canvas id="particles"></canvas>
+
+    <!-- Две дорожки: для теста и для признания -->
+    <audio id="audio-test" loop>
+        <source src="music_test.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-love" loop>
+        <source src="music_love.mp3" type="audio/mpeg">
+    </audio>
+
+    <main class="card" id="card">
+        <!-- ЭКРАН 1: ТЕСТ -->
+        <div id="screen-test" class="screen active">
+            <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+            <h2 id="q-counter">Вопрос 1 из 3</h2>
+            <h1 id="q-text">Загрузка...</h1>
+            <div id="answers" class="buttons"></div>
+        </div>
+
+        <!-- ЭКРАН 2: ПРИЗНАНИЕ -->
+        <div id="screen-love" class="screen">
+            <div class="icon" id="main-icon" style="font-size: 0; transition: font-size 0.5s;">💖</div>
+            <h1 id="question">Ты будешь моей девушкой?</h1>
+            
+            <div class="buttons" id="buttons">
+                <button id="yes-btn" class="btn yes">Да! 💕</button>
+                <button id="no-btn" class="btn no">Нет</button>
+            </div>
+            
+            <p id="message" class="message"></p>
+        </div>
+    </main>
+
+    <button id="music-toggle" class="music-toggle" title="Включить музыку">🎵</button>
+    <script src="script.js"></script>
+</body>
+</html>
