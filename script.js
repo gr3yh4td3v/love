@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
 
     // ==========================================
-    // ПЕРСОНАЛИЗАЦИЯ (Автоматически понимает русские буквы)
+    // ПЕРСОНАЛИЗАЦИЯ
     const urlParams = new URLSearchParams(window.location.search);
     let rawName = urlParams.get('name');
     let herName = "красотка"; 
@@ -50,6 +50,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioTest = document.getElementById('audio-test');
     const audioLove = document.getElementById('audio-love');
     const audioVoice = document.getElementById('audio-voice');
+
+    // ==========================================
+    // ХИТРОСТЬ: РАЗБЛОКИРОВКА ЗВУКА
+    // Как только она первый раз коснется экрана (нажмет на ответ), 
+    // мы "разбудим" плеер беззвучно, чтобы браузер разрешил звук.
+    document.body.addEventListener('click', () => {
+        if (audioVoice) {
+            audioVoice.volume = 0; 
+            audioVoice.play().then(() => {
+                audioVoice.pause(); 
+                audioVoice.currentTime = 0; 
+                audioVoice.volume = 1.0; 
+            }).catch(() => {});
+        }
+    }, { once: true }); 
+    // ==========================================
 
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
@@ -238,9 +254,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 playClickSound();
                 testAnswers.push(`В${currentQuestion + 1}: ${answer}`);
                 
-                // Если это последний вопрос — запускаем голос прямо сейчас!
+                // Запуск голоса ровно в момент клика по последнему ответу
                 if (currentQuestion === testQuestions.length - 1) {
-                    if (audioTest) audioTest.volume = 0.1; // Приглушаем музыку теста
+                    if (audioTest) audioTest.volume = 0.1; 
                     if (audioVoice) {
                         audioVoice.volume = 1.0;
                         audioVoice.play().catch(e => console.log('Ошибка звука:', e));
@@ -273,8 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
             screenLove.classList.add('active');
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
-
-            // Голос здесь больше не запускаем — он уже играет с момента клика
 
             await typeText(document.getElementById('question'), `${herName}, ты будешь моей девушкой?`, 50);
             
@@ -327,7 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
         message.textContent = "Ты сделала меня самым счастливым человеком на свете.";
         document.getElementById('buttons').style.display = 'none';
 
-        // Включаем романтичную музыку
         if (audioVoice) audioVoice.pause(); 
         if (audioTest) audioTest.pause();
         if (audioLove) {
