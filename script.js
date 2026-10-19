@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
 
     // ==========================================
-    // ПЕРСОНАЛИЗАЦИЯ
+    // ПЕРСОНАЛИЗАЦИЯ (Автоматически понимает русские буквы)
     const urlParams = new URLSearchParams(window.location.search);
     let rawName = urlParams.get('name');
     let herName = "красотка"; 
@@ -50,6 +50,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioTest = document.getElementById('audio-test');
     const audioLove = document.getElementById('audio-love');
     const audioVoice = document.getElementById('audio-voice');
+
+    // ==========================================
+    // ХИТРОСТЬ: РАЗБЛОКИРОВКА ЗВУКА
+    // Как только она первый раз коснется экрана, 
+    // мы "разбудим" плеер беззвучно, чтобы браузер разрешил звук.
+    document.body.addEventListener('click', () => {
+        if (audioVoice) {
+            audioVoice.volume = 0; 
+            audioVoice.play().then(() => {
+                audioVoice.pause(); 
+                audioVoice.currentTime = 0; 
+                audioVoice.volume = 1.0; 
+            }).catch(() => {});
+        }
+    }, { once: true }); 
+    // ==========================================
 
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
@@ -187,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ========== 5. ЛОГИКА ТЕСТА (С КНОПКОЙ ГОЛОСА) ==========
+    // ========== 5. ЛОГИКА ТЕСТА ==========
     const testQuestions = [
         {
             question: `${herName}, как ты думаешь, что нас объединяет?`, 
@@ -238,41 +254,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 playClickSound();
                 testAnswers.push(`В${currentQuestion + 1}: ${answer}`);
                 
-                // Если это последний вопрос — показываем красивую кнопку
+                // Запуск голоса ровно в момент клика по последнему ответу
                 if (currentQuestion === testQuestions.length - 1) {
                     if (audioTest) audioTest.volume = 0.1; 
-                    
-                    const voiceBtn = document.createElement('button');
-                    voiceBtn.textContent = "🎙️ У меня есть для тебя голосовое...";
-                    voiceBtn.style.marginTop = "20px";
-                    voiceBtn.style.padding = "15px 30px";
-                    voiceBtn.style.background = "linear-gradient(45deg, #ff4d6d, #ff9a3c)";
-                    voiceBtn.style.color = "white";
-                    voiceBtn.style.border = "none";
-                    voiceBtn.style.borderRadius = "50px";
-                    voiceBtn.style.cursor = "pointer";
-                    voiceBtn.style.fontSize = "16px";
-                    voiceBtn.style.fontFamily = "inherit";
-                    voiceBtn.style.fontWeight = "bold";
-                    voiceBtn.style.boxShadow = "0 10px 20px rgba(255, 77, 109, 0.4)";
-                    voiceBtn.style.zIndex = "999";
-                    voiceBtn.style.position = "relative";
-                    
-                    voiceBtn.addEventListener('click', () => {
-                        if (audioVoice) {
-                            audioVoice.volume = 1.0;
-                            audioVoice.play().then(() => {
-                                voiceBtn.style.display = 'none'; // Прячем
-                                currentQuestion++; // Идем на экран признания
-                                loadQuestion();
-                            }).catch(e => {
-                                alert("Ошибка звука: " + e.message);
-                            });
-                        }
-                    });
-                    
-                    answersDiv.appendChild(voiceBtn);
-                    return; 
+                    if (audioVoice) {
+                        audioVoice.volume = 1.0;
+                        audioVoice.play().catch(e => console.log('Ошибка звука:', e));
+                    }
                 }
 
                 currentQuestion++;
