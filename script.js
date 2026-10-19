@@ -9,11 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ПЕРСОНАЛИЗАЦИЯ (Автоматически понимает русские буквы)
     const urlParams = new URLSearchParams(window.location.search);
     let rawName = urlParams.get('name');
-    let herName = "красотка"; // Имя по умолчанию
+    let herName = "красотка"; 
     
     if (rawName) {
         try {
-            herName = decodeURIComponent(rawName); // Превращает %D0%A3... в "Ульяна"
+            herName = decodeURIComponent(rawName); 
         } catch (e) {
             herName = rawName; 
         }
@@ -237,6 +237,16 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', () => {
                 playClickSound();
                 testAnswers.push(`В${currentQuestion + 1}: ${answer}`);
+                
+                // Если это последний вопрос — запускаем голос прямо сейчас!
+                if (currentQuestion === testQuestions.length - 1) {
+                    if (audioTest) audioTest.volume = 0.1; // Приглушаем музыку теста
+                    if (audioVoice) {
+                        audioVoice.volume = 1.0;
+                        audioVoice.play().catch(e => console.log('Ошибка звука:', e));
+                    }
+                }
+
                 currentQuestion++;
                 btn.style.background = 'rgba(255,255,255,0.5)';
                 setTimeout(loadQuestion, 200);
@@ -247,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadQuestion();
 
-    // ========== 6. РОМАНТИЧНЫЙ РЕЖИМ + ГОЛОС ==========
+    // ========== 6. РОМАНТИЧНЫЙ РЕЖИМ ==========
     async function startLoveMode() {
         bgCool.style.opacity = 0;
         bgWarm.style.opacity = 1;
@@ -264,12 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
 
-            // ВКЛЮЧАЕМ ГОЛОС
-            if (audioTest) audioTest.volume = 0.1; 
-            if (audioVoice) {
-                audioVoice.volume = 1.0;
-                audioVoice.play().catch((e) => console.log('Голос не загружен или браузер блокирует звук:', e));
-            }
+            // Голос здесь больше не запускаем — он уже играет с момента клика
 
             await typeText(document.getElementById('question'), `${herName}, ты будешь моей девушкой?`, 50);
             
