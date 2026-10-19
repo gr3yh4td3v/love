@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
 
     // ==========================================
-    // ПЕРСОНАЛИЗАЦИЯ (Автоматически понимает русские буквы)
+    // ПЕРСОНАЛИЗАЦИЯ
     const urlParams = new URLSearchParams(window.location.search);
     let rawName = urlParams.get('name');
     let herName = "красотка"; 
@@ -50,22 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioTest = document.getElementById('audio-test');
     const audioLove = document.getElementById('audio-love');
     const audioVoice = document.getElementById('audio-voice');
-
-    // ==========================================
-    // ХИТРОСТЬ: РАЗБЛОКИРОВКА ЗВУКА
-    // Как только она первый раз коснется экрана, 
-    // мы "разбудим" плеер беззвучно, чтобы браузер разрешил звук.
-    document.body.addEventListener('click', () => {
-        if (audioVoice) {
-            audioVoice.volume = 0; 
-            audioVoice.play().then(() => {
-                audioVoice.pause(); 
-                audioVoice.currentTime = 0; 
-                audioVoice.volume = 1.0; 
-            }).catch(() => {});
-        }
-    }, { once: true }); 
-    // ==========================================
+    const audioVoiceYes = document.getElementById('audio-voice-yes'); 
 
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
@@ -134,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     animateParticles();
 
-    // ========== 2. ПАРАЛЛАКС (ТОЛЬКО ПК) ==========
+    // ========== 2. ПАРАЛЛАКС ==========
     const isDesktop = window.matchMedia("(pointer: fine)").matches;
     if (isDesktop) {
         document.addEventListener('mousemove', (e) => {
@@ -254,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 playClickSound();
                 testAnswers.push(`В${currentQuestion + 1}: ${answer}`);
                 
-                // Запуск голоса ровно в момент клика по последнему ответу
+                // ЗАПУСК ГОЛОСА №1 (Прямо в момент клика)
                 if (currentQuestion === testQuestions.length - 1) {
                     if (audioTest) audioTest.volume = 0.1; 
                     if (audioVoice) {
@@ -289,6 +274,12 @@ document.addEventListener('DOMContentLoaded', () => {
             screenLove.classList.add('active');
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
+
+            // ЗАПУСК ГОЛОСА №2 (На случай, если мобильный браузер заблокировал первый)
+            // Мы просто продолжаем воспроизведение с текущего места (с 0 секунды)
+            if (audioVoice && audioVoice.paused) {
+                audioVoice.play().catch(e => console.log('Ошибка повторного запуска:', e));
+            }
 
             await typeText(document.getElementById('question'), `${herName}, ты будешь моей девушкой?`, 50);
             
@@ -343,8 +334,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (audioVoice) audioVoice.pause(); 
         if (audioTest) audioTest.pause();
+        
+        if (audioVoiceYes) {
+            audioVoiceYes.volume = 1.0;
+            audioVoiceYes.play().catch(e => console.log('Ошибка второго голоса:', e));
+        }
+
         if (audioLove) {
-            audioLove.volume = 0.4;
+            audioLove.volume = 0.2; 
             audioLove.play().then(() => {
                 musicToggle.classList.add('visible');
                 musicToggle.textContent = '🔊';
