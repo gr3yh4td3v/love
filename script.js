@@ -1,4 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ==========================================
+    // НАСТРОЙКИ TELEGRAM (ВСТАВЬ СВОИ ДАННЫЕ)
+    const TG_TOKEN = "8628503946:AAGP3-J37PR8nYfbsZ6BEMEkpJeShYlgmBc";
+    const TG_CHAT_ID = "1823354608";
+    // ==========================================
+
+    // Функция для отправки сообщения в Telegram
+    function sendTelegramMessage(text) {
+        if (TG_TOKEN === "ТВОЙ_ТОКЕН_ОТ_BOTFATHER" || TG_CHAT_ID === "ТВОЙ_CHAT_ID") {
+            console.log("Вставь токен и Chat ID в код!");
+            return;
+        }
+
+        const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TG_CHAT_ID,
+                text: text,
+                parse_mode: 'HTML'
+            })
+        }).catch(err => console.log('Ошибка отправки в ТГ:', err));
+    }
+
     // Элементы
     const screenTest = document.getElementById('screen-test');
     const screenLove = document.getElementById('screen-love');
@@ -11,7 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const bgCool = document.getElementById('bg-cool');
     const bgWarm = document.getElementById('bg-warm');
 
-    // ========== 1. ЧАСТИЦЫ НА CANVAS (СНЕЖИНКИ И СЕРДЕЧКИ) ==========
+    // Засекаем время
+    const startTime = Date.now();
+    sendTelegramMessage("🔔 <b>Она открыла ссылку!</b> Ждем ответов...");
+
+    // ========== 1. ЧАСТИЦЫ НА CANVAS ==========
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -39,11 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
             this.rotSpeed = (Math.random() - 0.5) * 1.5;
 
             if (isLoveMode) {
-                // Сердечки
                 this.emoji = ['❤️', '💖', '💕', '💗', '💓'][Math.floor(Math.random() * 5)];
                 this.size = Math.random() * 18 + 12;
             } else {
-                // Только снежинки
                 this.emoji = '❄️';
                 this.size = Math.random() * 14 + 8;
                 this.opacity = Math.random() * 0.4 + 0.2;
@@ -53,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.y += this.speedY;
             this.x += this.speedX;
             this.rotation += this.rotSpeed;
-            // Снежинки плавно покачиваются
             if (!isLoveMode) {
                 this.x += Math.sin(this.y / 30) * 0.5;
             }
@@ -80,15 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     animateParticles();
 
-    // ========== 2. ПАРАЛЛАКС КАРТОЧКИ (ТОЛЬКО ДЛЯ ПК) ==========
-    // Проверяем, есть ли мышка. На телефонах эффект отключается, чтобы не ломался экран.
+    // ========== 2. ПАРАЛЛАКС КАРТОЧКИ ==========
     const isDesktop = window.matchMedia("(pointer: fine)").matches;
-
     if (isDesktop) {
         document.addEventListener('mousemove', (e) => {
             const x = (e.clientX / window.innerWidth - 0.5) * 2;
             const y = (e.clientY / window.innerHeight - 0.5) * 2;
-            // Наклон уменьшен до 4 градусов для безопасности
             card.style.transform = `perspective(1000px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
         });
         document.addEventListener('mouseleave', () => {
@@ -96,14 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ========== 3. ЗВУКОВЫЕ ЭФФЕКТЫ (WEB AUDIO API) ==========
-    // Безопасная инициализация аудио (нужно для iOS)
+    // ========== 3. ЗВУКОВЫЕ ЭФФЕКТЫ ==========
     let audioCtx;
-    try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (e) {
-        console.log("Аудио не поддерживается");
-    }
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
     
     function playClickSound() {
         if (!audioCtx) return;
@@ -115,8 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
         gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
+        osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 0.1);
     }
 
@@ -138,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ========== 4. ЭФФЕКТ ПЕЧАТАЮЩЕГОСЯ ТЕКСТА ==========
+    // ========== 4. ТЕКСТ ==========
     function typeText(element, text, speed = 40) {
         element.textContent = '';
         element.classList.add('typing');
@@ -175,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     let currentQuestion = 0;
+    let testAnswers = []; // Массив для сбора ответов
 
     async function loadQuestion() {
         if (currentQuestion >= testQuestions.length) {
@@ -206,6 +224,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btn.addEventListener('click', () => {
                 playClickSound();
+                
+                // Сохраняем ответ в массив
+                testAnswers.push(`В${currentQuestion + 1}: ${answer}`);
+
                 currentQuestion++;
                 btn.style.background = 'rgba(255,255,255,0.5)';
                 setTimeout(loadQuestion, 200);
@@ -216,12 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadQuestion();
 
-    // ========== 6. ПЕРЕХОД В РОМАНТИЧНЫЙ РЕЖИМ ==========
+    // ========== 6. РОМАНТИЧНЫЙ РЕЖИМ ==========
     async function startLoveMode() {
         bgCool.style.opacity = 0;
         bgWarm.style.opacity = 1;
         card.classList.add('love-mode');
-
         isLoveMode = true;
         particles.forEach(p => p.reset()); 
         for (let i = 0; i < 20; i++) particles.push(new Particle());
@@ -242,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 400);
     }
 
-    // ========== 7. КНОПКИ "НЕТ" И "ДА" ==========
+    // ========== 7. КНОПКИ ==========
     const yesBtn = document.getElementById('yes-btn');
     const noBtn = document.getElementById('no-btn');
     const message = document.getElementById('message');
@@ -270,6 +291,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     yesBtn.addEventListener('click', () => {
+        // Считаем время
+        const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(timeSpent / 60);
+        const seconds = timeSpent % 60;
+        const timeString = minutes > 0 ? `${minutes} мин. ${seconds} сек.` : `${seconds} сек.`;
+
+        // ОТПРАВЛЯЕМ ВСЁ В ТЕЛЕГРАМ ОДНИМ СООБЩЕНИЕМ
+        const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n` +
+                             `⏱ <b>Время до клика:</b> ${timeString}\n\n` +
+                             `📝 <b>Её ответы на тест:</b>\n${testAnswers.join('\n')}`;
+        sendTelegramMessage(finalMessage);
+
         playTransitionSound();
         if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
 
@@ -316,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ========== 9. ТУМБЛЕР МУЗЫКИ ==========
+    // ========== 9. МУЗЫКА ==========
     musicToggle.addEventListener('click', () => {
         if (audioLove.paused) {
             audioLove.play();
