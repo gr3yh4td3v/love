@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ========== 5. ЛОГИКА ТЕСТА (С ДИАГНОСТИКОЙ ЗВУКА) ==========
+    // ========== 5. ЛОГИКА ТЕСТА (С КНОПКОЙ ГОЛОСА) ==========
     const testQuestions = [
         {
             question: `${herName}, как ты думаешь, что нас объединяет?`, 
@@ -238,43 +238,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 playClickSound();
                 testAnswers.push(`В${currentQuestion + 1}: ${answer}`);
                 
-                // ДИАГНОСТИКА: Если это последний вопрос — показываем кнопку
+                // Если это последний вопрос — показываем красивую кнопку
                 if (currentQuestion === testQuestions.length - 1) {
                     if (audioTest) audioTest.volume = 0.1; 
                     
-                    const testAudioBtn = document.createElement('button');
-                    testAudioBtn.textContent = "▶️ Нажми, чтобы услышать голос";
-                    testAudioBtn.style.marginTop = "20px";
-                    testAudioBtn.style.padding = "15px 30px";
-                    testAudioBtn.style.background = "#ff4d6d";
-                    testAudioBtn.style.color = "white";
-                    testAudioBtn.style.border = "none";
-                    testAudioBtn.style.borderRadius = "50px";
-                    testAudioBtn.style.cursor = "pointer";
-                    testAudioBtn.style.fontSize = "16px";
-                    testAudioBtn.style.fontWeight = "bold";
-                    testAudioBtn.style.boxShadow = "0 10px 20px rgba(255, 77, 109, 0.4)";
-                    testAudioBtn.style.zIndex = "999";
-                    testAudioBtn.style.position = "relative";
+                    const voiceBtn = document.createElement('button');
+                    voiceBtn.textContent = "🎙️ У меня есть для тебя голосовое...";
+                    voiceBtn.style.marginTop = "20px";
+                    voiceBtn.style.padding = "15px 30px";
+                    voiceBtn.style.background = "linear-gradient(45deg, #ff4d6d, #ff9a3c)";
+                    voiceBtn.style.color = "white";
+                    voiceBtn.style.border = "none";
+                    voiceBtn.style.borderRadius = "50px";
+                    voiceBtn.style.cursor = "pointer";
+                    voiceBtn.style.fontSize = "16px";
+                    voiceBtn.style.fontFamily = "inherit";
+                    voiceBtn.style.fontWeight = "bold";
+                    voiceBtn.style.boxShadow = "0 10px 20px rgba(255, 77, 109, 0.4)";
+                    voiceBtn.style.zIndex = "999";
+                    voiceBtn.style.position = "relative";
                     
-                    testAudioBtn.addEventListener('click', () => {
+                    voiceBtn.addEventListener('click', () => {
                         if (audioVoice) {
                             audioVoice.volume = 1.0;
                             audioVoice.play().then(() => {
-                                console.log("Звук пошел!");
-                                testAudioBtn.style.display = 'none'; // Прячем после успеха
-                                currentQuestion++; // Идем дальше
+                                voiceBtn.style.display = 'none'; // Прячем
+                                currentQuestion++; // Идем на экран признания
                                 loadQuestion();
                             }).catch(e => {
-                                alert("Ошибка! Браузер заблокировал звук или файл не читается. Текст ошибки: " + e.message);
+                                alert("Ошибка звука: " + e.message);
                             });
-                        } else {
-                            alert("Аудио-элемент voice.mp3 не найден в HTML!");
                         }
                     });
                     
-                    answersDiv.appendChild(testAudioBtn);
-                    return; // Ждем клика
+                    answersDiv.appendChild(voiceBtn);
+                    return; 
                 }
 
                 currentQuestion++;
