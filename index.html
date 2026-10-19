@@ -12,7 +12,7 @@
     <div class="bg-layer" id="bg-warm"></div>
     <canvas id="particles"></canvas>
 
-    <!-- Музыка -->
+    <!-- ФОНОВАЯ МУЗЫКА (если файлов нет, сайт просто будет работать без них) -->
     <audio id="audio-test" loop>
         <source src="music_test.mp3" type="audio/mpeg">
     </audio>
@@ -20,9 +20,14 @@
         <source src="music_love.mp3" type="audio/mpeg">
     </audio>
     
-    <!-- ТВОЙ ГОЛОС -->
+    <!-- ТВОЙ ГОЛОС (до признания, после 3-го вопроса) -->
     <audio id="audio-voice">
         <source src="voice.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- ТВОЙ ГОЛОС (после нажатия на кнопку "Да") -->
+    <audio id="audio-voice-yes">
+        <source src="voice_yes.mp3" type="audio/mpeg">
     </audio>
 
     <main class="card" id="card">
