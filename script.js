@@ -51,22 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioLove = document.getElementById('audio-love');
     const audioVoice = document.getElementById('audio-voice');
 
-    // ==========================================
-    // ХИТРОСТЬ: РАЗБЛОКИРОВКА ЗВУКА
-    // Как только она первый раз коснется экрана (нажмет на ответ), 
-    // мы "разбудим" плеер беззвучно, чтобы браузер разрешил звук.
-    document.body.addEventListener('click', () => {
-        if (audioVoice) {
-            audioVoice.volume = 0; 
-            audioVoice.play().then(() => {
-                audioVoice.pause(); 
-                audioVoice.currentTime = 0; 
-                audioVoice.volume = 1.0; 
-            }).catch(() => {});
-        }
-    }, { once: true }); 
-    // ==========================================
-
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
 
@@ -203,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ========== 5. ЛОГИКА ТЕСТА ==========
+    // ========== 5. ЛОГИКА ТЕСТА (С ДИАГНОСТИКОЙ ЗВУКА) ==========
     const testQuestions = [
         {
             question: `${herName}, как ты думаешь, что нас объединяет?`, 
@@ -254,13 +238,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 playClickSound();
                 testAnswers.push(`В${currentQuestion + 1}: ${answer}`);
                 
-                // Запуск голоса ровно в момент клика по последнему ответу
+                // ДИАГНОСТИКА: Если это последний вопрос — показываем кнопку
                 if (currentQuestion === testQuestions.length - 1) {
                     if (audioTest) audioTest.volume = 0.1; 
-                    if (audioVoice) {
-                        audioVoice.volume = 1.0;
-                        audioVoice.play().catch(e => console.log('Ошибка звука:', e));
-                    }
+                    
+                    const testAudioBtn = document.createElement('button');
+                    testAudioBtn.textContent = "▶️ Нажми, чтобы услышать голос";
+                    testAudioBtn.style.marginTop = "20px";
+                    testAudioBtn.style.padding = "15px 30px";
+                    testAudioBtn.style.background = "#ff4d6d";
+                    testAudioBtn.style.color = "white";
+                    testAudioBtn.style.border = "none";
+                    testAudioBtn.style.borderRadius = "50px";
+                    testAudioBtn.style.cursor = "pointer";
+                    testAudioBtn.style.fontSize = "16px";
+                    testAudioBtn.style.fontWeight = "bold";
+                    testAudioBtn.style.boxShadow = "0 10px 20px rgba(255, 77, 109, 0.4)";
+                    testAudioBtn.style.zIndex = "999";
+                    testAudioBtn.style.position = "relative";
+                    
+                    testAudioBtn.addEventListener('click', () => {
+                        if (audioVoice) {
+                            audioVoice.volume = 1.0;
+                            audioVoice.play().then(() => {
+                                console.log("Звук пошел!");
+                                testAudioBtn.style.display = 'none'; // Прячем после успеха
+                                currentQuestion++; // Идем дальше
+                                loadQuestion();
+                            }).catch(e => {
+                                alert("Ошибка! Браузер заблокировал звук или файл не читается. Текст ошибки: " + e.message);
+                            });
+                        } else {
+                            alert("Аудио-элемент voice.mp3 не найден в HTML!");
+                        }
+                    });
+                    
+                    answersDiv.appendChild(testAudioBtn);
+                    return; // Ждем клика
                 }
 
                 currentQuestion++;
