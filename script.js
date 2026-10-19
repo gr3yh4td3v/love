@@ -1,15 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // НАСТРОЙКИ TELEGRAM
-    const TG_TOKEN = "8628503946:AAGP3-J37PR8nYfbsZ6BEMEkpJeShYlgmBc";
-    const TG_CHAT_ID = "1823354608"; 
+    const TG_TOKEN = "8628503946:AAGP3-J37PR8nYfbsZ6BEMEkpJeShYlgmBc"; // <--- ВСТАВЬ СВОЙ ТОКЕН
+    const TG_CHAT_ID = "1823354608"; // <--- ТВОЙ CHAT ID
     // ==========================================
 
     // ==========================================
-    // ПЕРСОНАЛИЗАЦИЯ (Берем имя из ссылки)
+    // ПЕРСОНАЛИЗАЦИЯ (Автоматически понимает русские буквы)
     const urlParams = new URLSearchParams(window.location.search);
-    // Если в ссылке есть ?name=Аня, возьмет "Аня". Если нет — "красотка".
-    const herName = urlParams.get('name') || "красотка"; 
+    let rawName = urlParams.get('name');
+    let herName = "красотка"; // Имя по умолчанию
+    
+    if (rawName) {
+        try {
+            herName = decodeURIComponent(rawName); // Превращает %D0%A3... в "Ульяна"
+        } catch (e) {
+            herName = rawName; 
+        }
+    }
     // ==========================================
 
     function sendTelegramMessage(text) {
@@ -41,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Аудио
     const audioTest = document.getElementById('audio-test');
     const audioLove = document.getElementById('audio-love');
-    const audioVoice = document.getElementById('audio-voice'); // Твой голос
+    const audioVoice = document.getElementById('audio-voice');
 
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
@@ -180,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ========== 5. ЛОГИКА ТЕСТА ==========
-    // Добавили имя в первый вопрос!
     const testQuestions = [
         {
             question: `${herName}, как ты думаешь, что нас объединяет?`, 
@@ -257,14 +264,13 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
 
-            // ВКЛЮЧАЕМ ТВОЙ ГОЛОС!
-            // Делаем тише фоновую музыку, если она есть, чтобы голос было слышно
+            // ВКЛЮЧАЕМ ГОЛОС
             if (audioTest) audioTest.volume = 0.1; 
-            
-            audioVoice.volume = 1.0;
-            audioVoice.play().catch(() => console.log('Голосовое сообщение не загружено'));
+            if (audioVoice) {
+                audioVoice.volume = 1.0;
+                audioVoice.play().catch((e) => console.log('Голос не загружен или браузер блокирует звук:', e));
+            }
 
-            // Печатаем вопрос с ее именем
             await typeText(document.getElementById('question'), `${herName}, ты будешь моей девушкой?`, 50);
             
             const buttonsDiv = document.getElementById('buttons');
@@ -317,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('buttons').style.display = 'none';
 
         // Включаем романтичную музыку
-        if (audioVoice) audioVoice.pause(); // Выключаем голос
+        if (audioVoice) audioVoice.pause(); 
         if (audioTest) audioTest.pause();
         if (audioLove) {
             audioLove.volume = 0.4;
