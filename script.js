@@ -12,12 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
         try { herName = decodeURIComponent(rawName); } catch (e) { herName = rawName; }
     }
 
-    // ОТПРАВКА ЧЕРЕЗ СКРЫТУЮ КАРТИНКУ (ПИКСЕЛЬ) - Обходит любые блокировки и VPN не нужен
+    // ОТПРАВКА ЧЕРЕЗ ПРОКСИ (Обход блокировки МТС)
     function sendTelegramMessage(text) {
         if (TG_TOKEN === "ТВОЙ_ТОКЕН_ОТ_BOTFATHER") return;
-        const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`;
-        const img = new Image();
-        img.src = url;
+        
+        // Используем бесплатный прокси-сервер для обхода блокировок
+        const proxyUrl = 'https://corsproxy.io/?';
+        const tgUrl = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`;
+        
+        fetch(proxyUrl + encodeURIComponent(tgUrl))
+            .catch(err => console.log('Ошибка отправки:', err));
     }
 
     const screenTest = document.getElementById('screen-test');
@@ -36,8 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioVoice = document.getElementById('audio-voice');
     const audioVoiceYes = document.getElementById('audio-voice-yes'); 
     const unlockBtn = document.getElementById('audio-unlock');
-    
-    // Наша новая кнопка
     const playVoiceBtn = document.getElementById('play-voice-btn');
 
     const startTime = Date.now();
@@ -163,14 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
 
-            // ПОКАЗЫВАЕМ КНОПКУ ГОЛОСА
             if (playVoiceBtn) {
                 playVoiceBtn.style.display = 'block';
                 playVoiceBtn.addEventListener('click', () => {
                     if (audioVoice) {
                         audioVoice.volume = 1.0;
                         audioVoice.play();
-                        playVoiceBtn.style.display = 'none'; // Прячем после нажатия
+                        playVoiceBtn.style.display = 'none'; 
                     }
                 });
             }
