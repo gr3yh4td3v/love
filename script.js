@@ -51,9 +51,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioLove = document.getElementById('audio-love');
     const audioVoice = document.getElementById('audio-voice');
     const audioVoiceYes = document.getElementById('audio-voice-yes'); 
+    
+    // Кнопка разблокировки
+    const unlockBtn = document.getElementById('audio-unlock');
 
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
+
+    // ==========================================
+    // РАЗБЛОКИРОВКА ЗВУКА (Для телефонов)
+    // ==========================================
+    unlockBtn.addEventListener('click', () => {
+        // 1. Беззвучно запускаем все аудио, чтобы браузер дал разрешение
+        if (audioTest) { audioTest.volume = 0; audioTest.play().catch(()=>{}); audioTest.pause(); }
+        if (audioLove) { audioLove.volume = 0; audioLove.play().catch(()=>{}); audioLove.pause(); }
+        if (audioVoice) { audioVoice.volume = 0; audioVoice.play().catch(()=>{}); audioVoice.pause(); audioVoice.currentTime = 0; }
+        if (audioVoiceYes) { audioVoiceYes.volume = 0; audioVoiceYes.play().catch(()=>{}); audioVoiceYes.pause(); audioVoiceYes.currentTime = 0; }
+
+        // 2. Прячем кнопку
+        unlockBtn.style.display = 'none';
+        
+        // 3. Включаем фоновую музыку теста (если она есть)
+        if (audioTest) {
+            audioTest.volume = 0.3;
+            audioTest.play().catch(()=>{});
+        }
+    });
 
     // ========== 1. ЧАСТИЦЫ НА CANVAS ==========
     const canvas = document.getElementById('particles');
@@ -150,24 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(); osc.stop(audioCtx.currentTime + 0.1);
     }
 
-    function playTransitionSound() {
-        if (!audioCtx) return;
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const notes = [523.25, 659.25, 783.99, 1046.50];
-        notes.forEach((freq, i) => {
-            setTimeout(() => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.8);
-            }, i * 100);
-        });
-    }
-
     // ========== 4. ТЕКСТ ==========
     function typeText(element, text, speed = 40) {
         element.textContent = '';
@@ -239,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 playClickSound();
                 testAnswers.push(`В${currentQuestion + 1}: ${answer}`);
                 
-                // ЗАПУСК ГОЛОСА №1 (Прямо в момент клика)
                 if (currentQuestion === testQuestions.length - 1) {
                     if (audioTest) audioTest.volume = 0.1; 
                     if (audioVoice) {
@@ -267,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
         particles.forEach(p => p.reset()); 
         for (let i = 0; i < 20; i++) particles.push(new Particle());
 
-        playTransitionSound();
         screenTest.classList.remove('active');
         
         setTimeout(async () => {
@@ -275,8 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
 
-            // ЗАПУСК ГОЛОСА №2 (На случай, если мобильный браузер заблокировал первый)
-            // Мы просто продолжаем воспроизведение с текущего места (с 0 секунды)
             if (audioVoice && audioVoice.paused) {
                 audioVoice.play().catch(e => console.log('Ошибка повторного запуска:', e));
             }
@@ -325,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
                              `📝 <b>Её ответы:</b>\n${testAnswers.join('\n')}`;
         sendTelegramMessage(finalMessage);
 
-        playTransitionSound();
         if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
 
         document.getElementById('question').textContent = "Я знал, что ты скажешь «Да»! 💖";
