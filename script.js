@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try { herName = decodeURIComponent(rawName); } catch (e) { herName = rawName; }
     }
 
-    // Отправка в Телеграм
     function sendTelegramMessage(text) {
         if (TG_TOKEN === "ТВОЙ_ТОКЕН_ОТ_BOTFATHER") return;
         const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
@@ -158,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 playClickSound();
                 testAnswers.push(`<b>Вопрос:</b> ${qData.question}\n<b>Ответ:</b> ${answer}`);
 
-                // Запускаем голос прямо в момент клика по третьему ответу
                 if (currentQuestion === testQuestions.length - 1) {
                     if (audioTest) audioTest.volume = 0.1; 
                     if (audioVoice) {
@@ -191,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
 
-            // Дублируем запуск на случай, если мобильный браузер поставил на паузу
             if (audioVoice && audioVoice.paused) {
                 audioVoice.play().catch(e => console.log('Ошибка:', e));
             }
@@ -229,11 +226,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeSpent = Math.floor((Date.now() - startTime) / 1000);
         const timeString = Math.floor(timeSpent / 60) > 0 ? `${Math.floor(timeSpent / 60)} мин. ${timeSpent % 60} сек.` : `${timeSpent} сек.`;
         
-        const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n👩 <b>Имя:</b> ${herName}\n⏱ <b>Время:</b> ${timeString}\n\n📝 <b>Ответы:</b>\n\n${testAnswers.join('\n\n')}`;
+        // УЛУЧШЕННОЕ СООБЩЕНИЕ В ТГ (добавили эмодзи и красоту)
+        const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n👩 <b>Имя:</b> ${herName}\n⏱ <b>Время:</b> ${timeString}\n\n📝 <b>Ответы:</b>\n\n${testAnswers.join('\n\n')}\n\n<i>Сделай скриншот этого сообщения! 😉</i>`;
         sendTelegramMessage(finalMessage);
 
-        document.getElementById('question').textContent = "Я знал, что ты скажешь «Да»! 💖";
-        message.textContent = "Ты сделала меня самым счастливым человеком на свете.";
+        // ВСПЫШКА ЭКРАНА
+        const flash = document.createElement('div');
+        flash.style.position = 'fixed'; flash.style.top = '0'; flash.style.left = '0';
+        flash.style.width = '100vw'; flash.style.height = '100vh';
+        flash.style.background = 'white'; flash.style.zIndex = '9999';
+        flash.style.pointerEvents = 'none';
+        document.body.appendChild(flash);
+        flash.animate([{ opacity: 0.8 }, { opacity: 0 }], { duration: 1000, easing: 'ease-out' });
+        setTimeout(() => flash.remove(), 1000);
+
+        // МЕНЯЕМ ТЕКСТ НА КРАСИВЫЙ
+        document.getElementById('question').innerHTML = `Я знал, что ты скажешь «Да»! 💖<br><span style="font-size: 24px; font-family: Comfortaa; color: #ff4d6d;">Ты сделала меня самым счастливым</span>`;
+        message.textContent = "";
         document.getElementById('buttons').style.display = 'none';
 
         if (audioVoice) audioVoice.pause(); 
