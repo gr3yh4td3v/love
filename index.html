@@ -21,7 +21,11 @@
     <!-- АУДИО -->
     <audio id="audio-test" loop><source src="music_test.mp3" type="audio/mpeg"></audio>
     <audio id="audio-love" loop><source src="music_love.mp3" type="audio/mpeg"></audio>
+    
+    <!-- Твой голос до признания -->
     <audio id="audio-voice"><source src="voice.mp3" type="audio/mpeg"></audio>
+    
+    <!-- Твой голос после кнопки Да -->
     <audio id="audio-voice-yes"><source src="voice_yes.mp3" type="audio/mpeg"></audio>
 
     <main class="card" id="card">
@@ -37,17 +41,24 @@
         <div id="screen-love" class="screen">
             <div class="icon" id="main-icon" style="font-size: 0; transition: font-size 0.5s;">💖</div>
             <h1 id="question">Ты будешь моей девушкой?</h1>
+            
+            <!-- КНОПКА ДЛЯ ГОЛОСА -->
+            <button id="play-voice-btn" style="display: none; margin: 15px auto; padding: 12px 25px; background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.5); color: #4a2c4a; border-radius: 50px; font-weight: bold; cursor: pointer; font-family: inherit; font-size: 16px; animation: pulse 2s infinite; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                🎙️ Нажми, чтобы услышать меня
+            </button>
+
             <div class="buttons" id="buttons">
                 <button id="yes-btn" class="btn yes">Да! 💕</button>
                 <button id="no-btn" class="btn no">Нет</button>
             </div>
+            
             <p id="message" class="message"></p>
         </div>
     </main>
 
     <button id="music-toggle" class="music-toggle" title="Включить музыку">🎵</button>
 
-    <!-- ОКНО ОТЛАДКИ (появится внизу экрана) -->
+    <!-- ОКНО ОТЛАДКИ (оставлено на случай, если понадобится снова) -->
     <div id="debug-log" style="position: fixed; bottom: 10px; left: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #00ff00; font-size: 12px; padding: 10px; z-index: 99999; display: none; max-height: 150px; overflow-y: auto; border-radius: 10px; font-family: monospace;"></div>
     
     <script src="script.js"></script>
