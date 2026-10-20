@@ -8,12 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Marck+Script&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- ЭКРАН РАЗБЛОКИРОВКИ ЗВУКА -->
-    <div id="audio-unlock" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; font-weight: bold; cursor: pointer; text-align: center; backdrop-filter: blur(5px); flex-direction: column;">
-        <div style="font-size: 40px; margin-bottom: 10px;">👆</div>
-        Нажми сюда, чтобы начать
-    </div>
-
     <div class="bg-layer" id="bg-cool"></div>
     <div class="bg-layer" id="bg-warm"></div>
     <canvas id="particles"></canvas>
@@ -41,11 +35,6 @@
         <div id="screen-love" class="screen">
             <div class="icon" id="main-icon" style="font-size: 0; transition: font-size 0.5s;">💖</div>
             <h1 id="question">Ты будешь моей девушкой?</h1>
-            
-            <!-- КНОПКА ДЛЯ ГОЛОСА -->
-            <button id="play-voice-btn" style="display: none; margin: 15px auto; padding: 12px 25px; background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.5); color: #4a2c4a; border-radius: 50px; font-weight: bold; cursor: pointer; font-family: inherit; font-size: 16px; animation: pulse 2s infinite; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                🎙️ Нажми, чтобы услышать меня
-            </button>
 
             <div class="buttons" id="buttons">
                 <button id="yes-btn" class="btn yes">Да! 💕</button>
@@ -57,9 +46,6 @@
     </main>
 
     <button id="music-toggle" class="music-toggle" title="Включить музыку">🎵</button>
-
-    <!-- ОКНО ОТЛАДКИ (оставлено на случай, если понадобится снова) -->
-    <div id="debug-log" style="position: fixed; bottom: 10px; left: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #00ff00; font-size: 12px; padding: 10px; z-index: 99999; display: none; max-height: 150px; overflow-y: auto; border-radius: 10px; font-family: monospace;"></div>
     
     <script src="script.js"></script>
 </body>
