@@ -12,16 +12,20 @@ document.addEventListener('DOMContentLoaded', () => {
         try { herName = decodeURIComponent(rawName); } catch (e) { herName = rawName; }
     }
 
-    // ОТПРАВКА ЧЕРЕЗ ПРОКСИ (Обход блокировки МТС)
+    // Отправка в Телеграм
     function sendTelegramMessage(text) {
         if (TG_TOKEN === "ТВОЙ_ТОКЕН_ОТ_BOTFATHER") return;
+        const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
         
-        // Используем бесплатный прокси-сервер для обхода блокировок
-        const proxyUrl = 'https://corsproxy.io/?';
-        const tgUrl = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`;
-        
-        fetch(proxyUrl + encodeURIComponent(tgUrl))
-            .catch(err => console.log('Ошибка отправки:', err));
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TG_CHAT_ID,
+                text: text,
+                parse_mode: 'HTML'
+            })
+        }).catch(err => console.log('Ошибка:', err));
     }
 
     const screenTest = document.getElementById('screen-test');
@@ -39,17 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioLove = document.getElementById('audio-love');
     const audioVoice = document.getElementById('audio-voice');
     const audioVoiceYes = document.getElementById('audio-voice-yes'); 
-    const unlockBtn = document.getElementById('audio-unlock');
-    const playVoiceBtn = document.getElementById('play-voice-btn');
 
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
-
-    if (unlockBtn) {
-        unlockBtn.addEventListener('click', () => {
-            unlockBtn.style.display = 'none';
-        });
-    }
 
     // ========== ЧАСТИЦЫ ==========
     const canvas = document.getElementById('particles');
@@ -96,14 +92,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     animateParticles();
 
+    // ========== ЗВУКИ ==========
+    let audioCtx;
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+    
+    function playClickSound() {
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    }
+
     // ========== ТЕКСТ ==========
     function typeText(element, text, speed = 40) {
-        element.textContent = ''; let i = 0;
+        element.textContent = ''; element.classList.add('typing');
+        let i = 0;
         return new Promise(resolve => {
             function type() {
                 if (i < text.length) {
                     element.textContent += text.charAt(i); i++; setTimeout(type, speed);
-                } else { resolve(); }
+                } else { element.classList.remove('typing'); resolve(); }
             }
             type();
         });
@@ -140,7 +155,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }, index * 150);
 
             btn.addEventListener('click', () => {
+                playClickSound();
                 testAnswers.push(`<b>Вопрос:</b> ${qData.question}\n<b>Ответ:</b> ${answer}`);
+
+                // Запускаем голос прямо в момент клика по третьему ответу
+                if (currentQuestion === testQuestions.length - 1) {
+                    if (audioTest) audioTest.volume = 0.1; 
+                    if (audioVoice) {
+                        audioVoice.volume = 1.0;
+                        audioVoice.play().catch(e => console.log('Ошибка звука:', e));
+                    }
+                }
+
                 currentQuestion++;
                 btn.style.background = 'rgba(255,255,255,0.5)';
                 setTimeout(loadQuestion, 200);
@@ -165,15 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
 
-            if (playVoiceBtn) {
-                playVoiceBtn.style.display = 'block';
-                playVoiceBtn.addEventListener('click', () => {
-                    if (audioVoice) {
-                        audioVoice.volume = 1.0;
-                        audioVoice.play();
-                        playVoiceBtn.style.display = 'none'; 
-                    }
-                });
+            // Дублируем запуск на случай, если мобильный браузер поставил на паузу
+            if (audioVoice && audioVoice.paused) {
+                audioVoice.play().catch(e => console.log('Ошибка:', e));
             }
 
             await typeText(document.getElementById('question'), `${herName}, ты будешь моей девушкой?`, 50);
@@ -191,10 +211,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let noCount = 0;
 
     noBtn.addEventListener('click', () => {
+        playClickSound();
         noCount++;
         if (noCount < noTexts.length) {
             noBtn.textContent = noTexts[noCount];
             noBtn.style.transform = `scale(${1 - (noCount * 0.1)})`;
+            const yesSize = parseFloat(window.getComputedStyle(yesBtn).fontSize);
+            yesBtn.style.fontSize = (yesSize + 3) + 'px';
+            yesBtn.style.padding = `${16 + noCount * 2}px ${40 + noCount * 4}px`;
         } else {
             noBtn.style.display = 'none';
             message.textContent = "Кнопка «Нет» сдалась 😄";
@@ -203,20 +227,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     yesBtn.addEventListener('click', () => {
         const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-        const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n👩 <b>Имя:</b> ${herName}\n\n📝 <b>Ответы:</b>\n\n${testAnswers.join('\n\n')}`;
+        const timeString = Math.floor(timeSpent / 60) > 0 ? `${Math.floor(timeSpent / 60)} мин. ${timeSpent % 60} сек.` : `${timeSpent} сек.`;
+        
+        const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n👩 <b>Имя:</b> ${herName}\n⏱ <b>Время:</b> ${timeString}\n\n📝 <b>Ответы:</b>\n\n${testAnswers.join('\n\n')}`;
         sendTelegramMessage(finalMessage);
 
         document.getElementById('question').textContent = "Я знал, что ты скажешь «Да»! 💖";
         message.textContent = "Ты сделала меня самым счастливым человеком на свете.";
         document.getElementById('buttons').style.display = 'none';
-        if (playVoiceBtn) playVoiceBtn.style.display = 'none';
 
         if (audioVoice) audioVoice.pause(); 
+        if (audioTest) audioTest.pause();
+        
         if (audioVoiceYes) {
             audioVoiceYes.volume = 1.0;
-            audioVoiceYes.play();
+            audioVoiceYes.play().catch(e => console.log('Ошибка второго голоса:', e));
         }
+
+        if (audioLove) {
+            audioLove.volume = 0.2; 
+            audioLove.play().then(() => {
+                musicToggle.classList.add('visible');
+                musicToggle.textContent = '🔊';
+            }).catch(() => console.log('Музыка не загружена'));
+        }
+
+        launchConfetti();
     });
+
+    // ========== КОНФЕТТИ ==========
+    function launchConfetti() {
+        const colors = ['#ff4d6d', '#ff9a3c', '#a18cd1', '#fecfef', '#ffffff', '#ffd93d'];
+        for (let i = 0; i < 150; i++) {
+            setTimeout(() => {
+                const c = document.createElement('div');
+                c.classList.add('confetti');
+                c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-20px';
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                c.style.width = (Math.random() * 8 + 6) + 'px'; c.style.height = (Math.random() * 14 + 8) + 'px';
+                c.style.transform = `rotate(${Math.random() * 360}deg)`;
+                document.body.appendChild(c);
+                const duration = Math.random() * 2 + 2.5;
+                c.animate([{ transform: `translateY(0) rotate(0deg)`, opacity: 1 }, { transform: `translateY(110vh) rotate(${Math.random() * 720}deg)`, opacity: 0.9 }], { duration: duration * 1000, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+                setTimeout(() => c.remove(), duration * 1000);
+            }, i * 20);
+        }
+    }
 
     musicToggle.addEventListener('click', () => {
         if (audioLove.paused) { audioLove.play(); musicToggle.textContent = '🔊'; }
