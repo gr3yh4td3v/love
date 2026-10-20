@@ -12,21 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try { herName = decodeURIComponent(rawName); } catch (e) { herName = rawName; }
     }
 
-    // Обход блокировок сети через отправку формы (URLSearchParams)
+    // ОТПРАВКА ЧЕРЕЗ СКРЫТУЮ КАРТИНКУ (ПИКСЕЛЬ) - Обходит любые блокировки и VPN не нужен
     function sendTelegramMessage(text) {
         if (TG_TOKEN === "ТВОЙ_ТОКЕН_ОТ_BOTFATHER") return;
-        const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
-        
-        // Отправляем как обычную веб-форму
-        const formData = new URLSearchParams();
-        formData.append('chat_id', TG_CHAT_ID);
-        formData.append('text', text);
-        formData.append('parse_mode', 'HTML');
-
-        fetch(url, {
-            method: 'POST',
-            body: formData
-        }).catch(err => console.log('Ошибка сети:', err));
+        const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`;
+        const img = new Image();
+        img.src = url;
     }
 
     const screenTest = document.getElementById('screen-test');
@@ -45,14 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioVoice = document.getElementById('audio-voice');
     const audioVoiceYes = document.getElementById('audio-voice-yes'); 
     const unlockBtn = document.getElementById('audio-unlock');
+    
+    // Наша новая кнопка
+    const playVoiceBtn = document.getElementById('play-voice-btn');
 
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
 
     if (unlockBtn) {
         unlockBtn.addEventListener('click', () => {
-            if (audioVoice) { audioVoice.volume = 0; audioVoice.play().catch(()=>{}); audioVoice.pause(); audioVoice.currentTime = 0; }
-            if (audioVoiceYes) { audioVoiceYes.volume = 0; audioVoiceYes.play().catch(()=>{}); audioVoiceYes.pause(); }
             unlockBtn.style.display = 'none';
         });
     }
@@ -102,41 +94,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     animateParticles();
 
-    const isDesktop = window.matchMedia("(pointer: fine)").matches;
-    if (isDesktop) {
-        document.addEventListener('mousemove', (e) => {
-            const x = (e.clientX / window.innerWidth - 0.5) * 2;
-            const y = (e.clientY / window.innerHeight - 0.5) * 2;
-            card.style.transform = `perspective(1000px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
-        });
-    }
-
-    let audioCtx;
-    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
-    function playClickSound() {
-        if (!audioCtx) return;
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-    }
-
+    // ========== ТЕКСТ ==========
     function typeText(element, text, speed = 40) {
-        element.textContent = ''; element.classList.add('typing'); let i = 0;
+        element.textContent = ''; let i = 0;
         return new Promise(resolve => {
             function type() {
                 if (i < text.length) {
                     element.textContent += text.charAt(i); i++; setTimeout(type, speed);
-                } else { element.classList.remove('typing'); resolve(); }
+                } else { resolve(); }
             }
             type();
         });
     }
 
+    // ========== ТЕСТ ==========
     const testQuestions = [
         { question: `${herName}, как ты думаешь, что нас объединяет?`, answers: ["Любовь к приключениям", "Общее чувство юмора", "Мы просто классные"] },
         { question: "Твой идеальный вечер?", answers: ["Уютный фильм дома", "Прогулка под звездами", "Вкусный ужин вдвоем"] },
@@ -167,17 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, index * 150);
 
             btn.addEventListener('click', () => {
-                playClickSound();
                 testAnswers.push(`<b>Вопрос:</b> ${qData.question}\n<b>Ответ:</b> ${answer}`);
-
-                // ХИТРОСТЬ: Запускаем голос прямо при клике (телефон разрешит)
-                if (currentQuestion === testQuestions.length - 1) {
-                    if (audioVoice) {
-                        audioVoice.volume = 1.0;
-                        audioVoice.play().catch(e => console.log(e));
-                    }
-                }
-
                 currentQuestion++;
                 btn.style.background = 'rgba(255,255,255,0.5)';
                 setTimeout(loadQuestion, 200);
@@ -188,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadQuestion();
 
+    // ========== ПРИЗНАНИЕ ==========
     async function startLoveMode() {
         bgCool.style.opacity = 0; bgWarm.style.opacity = 1;
         card.classList.add('love-mode'); isLoveMode = true;
@@ -201,9 +163,16 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
 
-            // Если браузер поставил на паузу после смены экрана — будим снова
-            if (audioVoice && audioVoice.paused) {
-                audioVoice.play().catch(e => console.log(e));
+            // ПОКАЗЫВАЕМ КНОПКУ ГОЛОСА
+            if (playVoiceBtn) {
+                playVoiceBtn.style.display = 'block';
+                playVoiceBtn.addEventListener('click', () => {
+                    if (audioVoice) {
+                        audioVoice.volume = 1.0;
+                        audioVoice.play();
+                        playVoiceBtn.style.display = 'none'; // Прячем после нажатия
+                    }
+                });
             }
 
             await typeText(document.getElementById('question'), `${herName}, ты будешь моей девушкой?`, 50);
@@ -211,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 400);
     }
 
+    // ========== КНОПКИ ==========
     const yesBtn = document.getElementById('yes-btn');
     const noBtn = document.getElementById('no-btn');
     const message = document.getElementById('message');
@@ -220,14 +190,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let noCount = 0;
 
     noBtn.addEventListener('click', () => {
-        playClickSound();
         noCount++;
         if (noCount < noTexts.length) {
             noBtn.textContent = noTexts[noCount];
             noBtn.style.transform = `scale(${1 - (noCount * 0.1)})`;
-            const yesSize = parseFloat(window.getComputedStyle(yesBtn).fontSize);
-            yesBtn.style.fontSize = (yesSize + 3) + 'px';
-            yesBtn.style.padding = `${16 + noCount * 2}px ${40 + noCount * 4}px`;
         } else {
             noBtn.style.display = 'none';
             message.textContent = "Кнопка «Нет» сдалась 😄";
@@ -236,49 +202,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     yesBtn.addEventListener('click', () => {
         const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-        const timeString = Math.floor(timeSpent / 60) > 0 ? `${Math.floor(timeSpent / 60)} мин. ${timeSpent % 60} сек.` : `${timeSpent} сек.`;
-        
-        const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n👩 <b>Имя:</b> ${herName}\n⏱ <b>Время:</b> ${timeString}\n\n📝 <b>Ответы:</b>\n\n${testAnswers.join('\n\n')}`;
+        const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n👩 <b>Имя:</b> ${herName}\n\n📝 <b>Ответы:</b>\n\n${testAnswers.join('\n\n')}`;
         sendTelegramMessage(finalMessage);
 
-        if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
         document.getElementById('question').textContent = "Я знал, что ты скажешь «Да»! 💖";
         message.textContent = "Ты сделала меня самым счастливым человеком на свете.";
         document.getElementById('buttons').style.display = 'none';
+        if (playVoiceBtn) playVoiceBtn.style.display = 'none';
 
         if (audioVoice) audioVoice.pause(); 
         if (audioVoiceYes) {
             audioVoiceYes.volume = 1.0;
-            audioVoiceYes.play().catch(e => console.log(e));
+            audioVoiceYes.play();
         }
-        if (audioLove) {
-            audioLove.volume = 0.2; 
-            audioLove.play().then(() => {
-                musicToggle.classList.add('visible');
-                musicToggle.textContent = '🔊';
-            }).catch(() => console.log('Музыка не загружена'));
-        }
-
-        launchConfetti();
     });
-
-    function launchConfetti() {
-        const colors = ['#ff4d6d', '#ff9a3c', '#a18cd1', '#fecfef', '#ffffff', '#ffd93d'];
-        for (let i = 0; i < 150; i++) {
-            setTimeout(() => {
-                const c = document.createElement('div');
-                c.classList.add('confetti');
-                c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-20px';
-                c.style.background = colors[Math.floor(Math.random() * colors.length)];
-                c.style.width = (Math.random() * 8 + 6) + 'px'; c.style.height = (Math.random() * 14 + 8) + 'px';
-                c.style.transform = `rotate(${Math.random() * 360}deg)`;
-                document.body.appendChild(c);
-                const duration = Math.random() * 2 + 2.5;
-                c.animate([{ transform: `translateY(0) rotate(0deg)`, opacity: 1 }, { transform: `translateY(110vh) rotate(${Math.random() * 720}deg)`, opacity: 0.9 }], { duration: duration * 1000, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
-                setTimeout(() => c.remove(), duration * 1000);
-            }, i * 20);
-        }
-    }
 
     musicToggle.addEventListener('click', () => {
         if (audioLove.paused) { audioLove.play(); musicToggle.textContent = '🔊'; }
