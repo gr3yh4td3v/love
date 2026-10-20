@@ -8,11 +8,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Marck+Script&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- ЭКРАН РАЗБЛОКИРОВКИ ЗВУКА (Для телефонов) -->
+    <div id="audio-unlock" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; font-weight: bold; cursor: pointer; text-align: center; backdrop-filter: blur(5px); flex-direction: column;">
+        <div style="font-size: 40px; margin-bottom: 10px;">👆</div>
+        Нажми сюда, чтобы начать
+    </div>
+
     <div class="bg-layer" id="bg-cool"></div>
     <div class="bg-layer" id="bg-warm"></div>
     <canvas id="particles"></canvas>
 
-    <!-- ФОНОВАЯ МУЗЫКА (если файлов нет, сайт просто будет работать без них) -->
+    <!-- ФОНОВАЯ МУЗЫКА -->
     <audio id="audio-test" loop>
         <source src="music_test.mp3" type="audio/mpeg">
     </audio>
@@ -20,12 +26,12 @@
         <source src="music_love.mp3" type="audio/mpeg">
     </audio>
     
-    <!-- ТВОЙ ГОЛОС (до признания, после 3-го вопроса) -->
+    <!-- ТВОЙ ГОЛОС (до признания) -->
     <audio id="audio-voice">
         <source src="voice.mp3" type="audio/mpeg">
     </audio>
     
-    <!-- ТВОЙ ГОЛОС (после нажатия на кнопку "Да") -->
+    <!-- ТВОЙ ГОЛОС (после кнопки Да) -->
     <audio id="audio-voice-yes">
         <source src="voice_yes.mp3" type="audio/mpeg">
     </audio>
