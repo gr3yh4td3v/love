@@ -61,22 +61,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // РАЗБЛОКИРОВКА ЗВУКА (Для телефонов)
     // ==========================================
-    unlockBtn.addEventListener('click', () => {
-        // 1. Беззвучно запускаем все аудио, чтобы браузер дал разрешение
-        if (audioTest) { audioTest.volume = 0; audioTest.play().catch(()=>{}); audioTest.pause(); }
-        if (audioLove) { audioLove.volume = 0; audioLove.play().catch(()=>{}); audioLove.pause(); }
-        if (audioVoice) { audioVoice.volume = 0; audioVoice.play().catch(()=>{}); audioVoice.pause(); audioVoice.currentTime = 0; }
-        if (audioVoiceYes) { audioVoiceYes.volume = 0; audioVoiceYes.play().catch(()=>{}); audioVoiceYes.pause(); audioVoiceYes.currentTime = 0; }
+    if (unlockBtn) {
+        unlockBtn.addEventListener('click', () => {
+            if (audioTest) { audioTest.volume = 0; audioTest.play().catch(()=>{}); audioTest.pause(); }
+            if (audioLove) { audioLove.volume = 0; audioLove.play().catch(()=>{}); audioLove.pause(); }
+            if (audioVoice) { audioVoice.volume = 0; audioVoice.play().catch(()=>{}); audioVoice.pause(); audioVoice.currentTime = 0; }
+            if (audioVoiceYes) { audioVoiceYes.volume = 0; audioVoiceYes.play().catch(()=>{}); audioVoiceYes.pause(); audioVoiceYes.currentTime = 0; }
 
-        // 2. Прячем кнопку
-        unlockBtn.style.display = 'none';
-        
-        // 3. Включаем фоновую музыку теста (если она есть)
-        if (audioTest) {
-            audioTest.volume = 0.3;
-            audioTest.play().catch(()=>{});
-        }
-    });
+            unlockBtn.style.display = 'none';
+            
+            if (audioTest) {
+                audioTest.volume = 0.3;
+                audioTest.play().catch(()=>{});
+            }
+        });
+    }
 
     // ========== 1. ЧАСТИЦЫ НА CANVAS ==========
     const canvas = document.getElementById('particles');
@@ -210,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     let currentQuestion = 0;
-    let testAnswers = [];
+    let testAnswers = []; // Сюда собираем красивые ответы
 
     async function loadQuestion() {
         if (currentQuestion >= testQuestions.length) {
@@ -242,8 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btn.addEventListener('click', () => {
                 playClickSound();
-                testAnswers.push(`В${currentQuestion + 1}: ${answer}`);
                 
+                // Сохраняем и вопрос, и ответ
+                testAnswers.push(`<b>Вопрос:</b> ${qData.question}\n<b>Ответ:</b> ${answer}`);
+
                 if (currentQuestion === testQuestions.length - 1) {
                     if (audioTest) audioTest.volume = 0.1; 
                     if (audioVoice) {
@@ -320,10 +321,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const seconds = timeSpent % 60;
         const timeString = minutes > 0 ? `${minutes} мин. ${seconds} сек.` : `${seconds} сек.`;
 
+        // Собираем красивое сообщение для Телеграма (добавили разделители)
         const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n` +
                              `👩 <b>Имя:</b> ${herName}\n` +
                              `⏱ <b>Время до клика:</b> ${timeString}\n\n` +
-                             `📝 <b>Её ответы:</b>\n${testAnswers.join('\n')}`;
+                             `📝 <b>Её ответы на тест:</b>\n\n${testAnswers.join('\n\n')}`;
+                             
         sendTelegramMessage(finalMessage);
 
         if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
