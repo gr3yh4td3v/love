@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Marck+Script&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- ЭКРАН РАЗБЛОКИРОВКИ ЗВУКА (Для телефонов) -->
+    <!-- ЭКРАН РАЗБЛОКИРОВКИ ЗВУКА -->
     <div id="audio-unlock" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; font-weight: bold; cursor: pointer; text-align: center; backdrop-filter: blur(5px); flex-direction: column;">
         <div style="font-size: 40px; margin-bottom: 10px;">👆</div>
         Нажми сюда, чтобы начать
@@ -18,23 +18,11 @@
     <div class="bg-layer" id="bg-warm"></div>
     <canvas id="particles"></canvas>
 
-    <!-- ФОНОВАЯ МУЗЫКА -->
-    <audio id="audio-test" loop>
-        <source src="music_test.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="audio-love" loop>
-        <source src="music_love.mp3" type="audio/mpeg">
-    </audio>
-    
-    <!-- ТВОЙ ГОЛОС (до признания) -->
-    <audio id="audio-voice">
-        <source src="voice.mp3" type="audio/mpeg">
-    </audio>
-    
-    <!-- ТВОЙ ГОЛОС (после кнопки Да) -->
-    <audio id="audio-voice-yes">
-        <source src="voice_yes.mp3" type="audio/mpeg">
-    </audio>
+    <!-- АУДИО -->
+    <audio id="audio-test" loop><source src="music_test.mp3" type="audio/mpeg"></audio>
+    <audio id="audio-love" loop><source src="music_love.mp3" type="audio/mpeg"></audio>
+    <audio id="audio-voice"><source src="voice.mp3" type="audio/mpeg"></audio>
+    <audio id="audio-voice-yes"><source src="voice_yes.mp3" type="audio/mpeg"></audio>
 
     <main class="card" id="card">
         <!-- ЭКРАН 1: ТЕСТ -->
@@ -49,17 +37,19 @@
         <div id="screen-love" class="screen">
             <div class="icon" id="main-icon" style="font-size: 0; transition: font-size 0.5s;">💖</div>
             <h1 id="question">Ты будешь моей девушкой?</h1>
-            
             <div class="buttons" id="buttons">
                 <button id="yes-btn" class="btn yes">Да! 💕</button>
                 <button id="no-btn" class="btn no">Нет</button>
             </div>
-            
             <p id="message" class="message"></p>
         </div>
     </main>
 
     <button id="music-toggle" class="music-toggle" title="Включить музыку">🎵</button>
+
+    <!-- ОКНО ОТЛАДКИ (появится внизу экрана) -->
+    <div id="debug-log" style="position: fixed; bottom: 10px; left: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #00ff00; font-size: 12px; padding: 10px; z-index: 99999; display: none; max-height: 150px; overflow-y: auto; border-radius: 10px; font-family: monospace;"></div>
+    
     <script src="script.js"></script>
 </body>
 </html>
