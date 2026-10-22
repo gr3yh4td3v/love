@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { herName = decodeURIComponent(rawName); } catch (e) { herName = rawName; }
     }
 
-    // Переводчик (Ульяна -> ulyana)
+    // ЖЕЛЕЗОБЕТОННЫЙ ПЕРЕВОДЧИК (Ульяна -> ulyana)
     function translit(str) {
         const ru = "А-а-Б-б-В-в-Г-г-Д-д-Е-е-Ё-ё-Ж-ж-З-з-И-и-Й-й-К-к-Л-л-М-м-Н-н-О-о-П-п-Р-р-С-с-Т-т-У-у-Ф-ф-Х-х-Ц-ц-Ч-ч-Ш-ш-Щ-щ-Ь-ь-Ы-ы-Ъ-ъ-Э-э-Ю-ю-Я-я".split("-");
         const en = "A-a-B-b-V-v-G-g-D-d-E-e-E-e-Zh-zh-Z-z-I-i-I-i-K-k-L-l-M-m-N-n-O-o-P-p-R-r-S-s-T-t-U-u-F-f-Kh-kh-Ts-ts-Ch-ch-Sh-sh-Shch-shch--Y-y--E-e-Yu-yu-Ya-ya".split("-");
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = ru.indexOf(char);
             res += (index !== -1) ? en[index] : char;
         }
-        return res.toLowerCase().replace(/[^a-z0-9]/g, ''); // Оставляем только буквы и цифры
+        return res.toLowerCase().replace(/[^a-z0-9]/g, ''); // Оставляем только латиницу и цифры
     }
 
     function sendTelegramMessage(text) {
@@ -66,6 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const audioVoice = document.getElementById('audio-voice');
     const audioVoiceYes = document.getElementById('audio-voice-yes'); 
+    
+    // Заглушки для музыки, чтобы консоль не ругалась (если файлов нет)
+    const audioTest = document.getElementById('audio-test');
+    const audioLove = document.getElementById('audio-love');
 
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
@@ -203,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function saveAnswer(answer) {
         testAnswers.push(`<b>Вопрос:</b> ${testQuestions[currentQuestion].question}\n<b>Ответ:</b> ${answer}`);
         if (currentQuestion === testQuestions.length - 1 && audioVoice) {
-            audioVoice.volume = 1.0; audioVoice.play().catch(e => console.log(e));
+            audioVoice.volume = 1.0; audioVoice.play().catch(e => console.log("Голос не загружен"));
         }
         currentQuestion++;
         setTimeout(loadQuestion, 200);
@@ -225,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { mainIcon.style.fontSize = '80px'; }, 100);
             document.title = "Ты будешь моей девушкой? 💕";
 
-            if (audioVoice && audioVoice.paused) audioVoice.play().catch(e => console.log(e));
+            if (audioVoice && audioVoice.paused) audioVoice.play().catch(e => console.log("Голос не загружен"));
 
             await typeText(document.getElementById('question'), `${herName}, ты будешь моей девушкой?`, 50);
             document.getElementById('buttons').style.opacity = '1';
@@ -274,9 +278,13 @@ document.addEventListener('DOMContentLoaded', () => {
         finalScreen.style.display = 'block';
         poemContainer.innerHTML = `Ты буквально словила джекпот.<br>А может немного не тот...<br>Возможно, я сделал ошибку.<br>Мы узнаем это через недельку 😉`;
 
-        // ЖЕЛЕЗОБЕТОННАЯ ЗАГРУЗКА ФОТО (photo_ulyana.jpg)
+        // 100% РАБОЧАЯ ЗАГРУЗКА ФОТО
         if (herName !== "красотка") {
-            const photoName = "photo_" + translit(herName) + ".jpg"; 
+            // Превращаем "Ульяна" в "ulyana"
+            const latinName = translit(herName); 
+            // Формируем имя файла: photo_ulyana.jpg
+            const photoName = "photo_" + latinName + ".jpg"; 
+            
             memoryPhoto.src = photoName; 
             
             memoryPhoto.onerror = () => { 
@@ -312,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (audioVoice) audioVoice.pause(); 
         if (audioVoiceYes) {
             audioVoiceYes.volume = 1.0;
-            audioVoiceYes.play().catch(e => console.log(e));
+            audioVoiceYes.play().catch(e => console.log("Второй голос не загружен"));
         }
 
         launchConfetti();
