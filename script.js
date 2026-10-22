@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { herName = decodeURIComponent(rawName); } catch (e) { herName = rawName; }
     }
 
-    // ФУНКЦИЯ ПЕРЕВОДА РУССКИХ БУКВ В ЛАТИНИЦУ (для поиска фото)
+    // Функция перевода русских букв в латиницу (для поиска фото)
     function translit(str) {
         const ru = "А-а-Б-б-В-в-Г-г-Д-д-Е-е-Ё-ё-Ж-ж-З-з-И-и-Й-й-К-к-Л-л-М-м-Н-н-О-о-П-п-Р-р-С-с-Т-т-У-у-Ф-ф-Х-х-Ц-ц-Ч-ч-Ш-ш-Щ-щ-Ь-ь-Ы-ы-Ъ-ъ-Э-э-Ю-ю-Я-я".split("-");
         const en = "A-a-B-b-V-v-G-g-D-d-E-e-E-e-Zh-zh-Z-z-I-i-I-i-K-k-L-l-M-m-N-n-O-o-P-p-R-r-S-s-T-t-U-u-F-f-Kh-kh-Ts-ts-Ch-ch-Sh-sh-Shch-shch--Y-y--E-e-Yu-yu-Ya-ya".split("-");
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = ru.indexOf(char);
             res += (index !== -1) ? en[index] : char;
         }
-        return res.toLowerCase().replace(/\s+/g, ''); // Убираем пробелы и делаем строчными
+        return res.toLowerCase().replace(/\s+/g, ''); 
     }
 
     function sendTelegramMessage(text) {
@@ -54,7 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalScreen = document.getElementById('final-screen');
     const poemContainer = document.getElementById('poem-container');
     const memoryPhoto = document.getElementById('memory-photo');
-    const dateBtn = document.getElementById('date-btn');
+    
+    // Календарь
+    const datePickerContainer = document.getElementById('date-picker-container');
+    const dateInput = document.getElementById('date-input');
+    const timeWrapper = document.getElementById('time-wrapper');
+    const timeInput = document.getElementById('time-input');
+    const confirmDateBtn = document.getElementById('confirm-date-btn');
 
     // Контейнер для своего варианта
     const customContainer = document.getElementById('custom-answer-container');
@@ -270,28 +276,35 @@ document.addEventListener('DOMContentLoaded', () => {
         finalScreen.style.display = 'block';
         poemContainer.innerHTML = `Ты буквально словила джекпот.<br>А может немного не тот...<br>Возможно, я сделал ошибку.<br>Мы узнаем это через недельку 😉`;
 
-        // Ищем фото в формате (например, ulyana.jpg)
         if (herName !== "красотка") {
-            const photoName = translit(herName) + ".jpg"; // Превращаем "Ульяна" в "ulyana.jpg"
+            const photoName = translit(herName) + ".jpg"; 
             memoryPhoto.src = photoName; 
-            
-            memoryPhoto.onerror = () => { memoryPhoto.style.display = 'none'; }; // Если фото нет — прячем
+            memoryPhoto.onerror = () => { memoryPhoto.style.display = 'none'; };
             memoryPhoto.onload = () => { 
                 memoryPhoto.style.display = 'block';
                 memoryPhoto.animate([{opacity: 0, transform: 'scale(0.9)'}, {opacity: 1, transform: 'scale(1)'}], {duration: 800, fill: 'forwards', easing: 'ease-out'});
             };
         }
 
-        dateBtn.style.display = 'block';
-        dateBtn.onclick = () => {
-            const date = prompt("Какой день тебе удобен для нашего свидания? (Напиши, например: Суббота, 15:00)");
-            if (date) {
-                sendTelegramMessage(`📅 <b>ОНА ВЫБРАЛА ДАТУ СВИДАНИЯ!</b>\n\nОна предложила: <b>${date}</b>`);
-                dateBtn.textContent = `Ты выбрала: ${date}`;
-                dateBtn.style.background = "#4caf50"; 
-                dateBtn.style.pointerEvents = 'none'; 
+        datePickerContainer.style.display = 'block';
+
+        dateInput.addEventListener('change', () => {
+            if (dateInput.value) {
+                timeWrapper.style.display = 'block';
             }
-        };
+        });
+
+        confirmDateBtn.addEventListener('click', () => {
+            const selectedDate = dateInput.value;
+            const selectedTime = timeInput.value || "Время не указано";
+            
+            if (!selectedDate) return;
+
+            sendTelegramMessage(`📅 <b>ОНА ВЫБРАЛА ДАТУ СВИДАНИЯ!</b>\n\n🗓 <b>Дата:</b> ${selectedDate}\n⏰ <b>Время:</b> ${selectedTime}`);
+            
+            datePickerContainer.innerHTML = `<h3 style="font-family: Comfortaa; color: #4a2c4a; font-size: 18px;">Договорились! 💖<br><span style="font-size: 14px; font-weight: normal;">Жди сообщения с деталями.</span></h3>`;
+            datePickerContainer.style.background = "rgba(255, 255, 255, 0.6)";
+        });
 
         if (audioVoice) audioVoice.pause(); 
         if (audioVoiceYes) {
