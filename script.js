@@ -12,19 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try { herName = decodeURIComponent(rawName); } catch (e) { herName = rawName; }
     }
 
-    // ЖЕЛЕЗОБЕТОННЫЙ ПЕРЕВОДЧИК (Ульяна -> ulyana)
-    function translit(str) {
-        const ru = "А-а-Б-б-В-в-Г-г-Д-д-Е-е-Ё-ё-Ж-ж-З-з-И-и-Й-й-К-к-Л-л-М-м-Н-н-О-о-П-п-Р-р-С-с-Т-т-У-у-Ф-ф-Х-х-Ц-ц-Ч-ч-Ш-ш-Щ-щ-Ь-ь-Ы-ы-Ъ-ъ-Э-э-Ю-ю-Я-я".split("-");
-        const en = "A-a-B-b-V-v-G-g-D-d-E-e-E-e-Zh-zh-Z-z-I-i-I-i-K-k-L-l-M-m-N-n-O-o-P-p-R-r-S-s-T-t-U-u-F-f-Kh-kh-Ts-ts-Ch-ch-Sh-sh-Shch-shch--Y-y--E-e-Yu-yu-Ya-ya".split("-");
-        let res = "";
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charAt(i);
-            const index = ru.indexOf(char);
-            res += (index !== -1) ? en[index] : char;
-        }
-        return res.toLowerCase().replace(/[^a-z0-9]/g, ''); // Оставляем только латиницу и цифры
-    }
-
     function sendTelegramMessage(text) {
         if (TG_TOKEN === "ТВОЙ_ТОКЕН_ОТ_BOTFATHER") return;
         const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
@@ -66,10 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const audioVoice = document.getElementById('audio-voice');
     const audioVoiceYes = document.getElementById('audio-voice-yes'); 
-    
-    // Заглушки для музыки, чтобы консоль не ругалась (если файлов нет)
-    const audioTest = document.getElementById('audio-test');
-    const audioLove = document.getElementById('audio-love');
 
     const startTime = Date.now();
     sendTelegramMessage(`🔔 <b>Она открыла ссылку!</b> (Имя: ${herName})`);
@@ -278,13 +261,18 @@ document.addEventListener('DOMContentLoaded', () => {
         finalScreen.style.display = 'block';
         poemContainer.innerHTML = `Ты буквально словила джекпот.<br>А может немного не тот...<br>Возможно, я сделал ошибку.<br>Мы узнаем это через недельку 😉`;
 
-        // 100% РАБОЧАЯ ЗАГРУЗКА ФОТО
-        if (herName !== "красотка") {
-            // Превращаем "Ульяна" в "ulyana"
-            const latinName = translit(herName); 
-            // Формируем имя файла: photo_ulyana.jpg
-            const photoName = "photo_" + latinName + ".jpg"; 
-            
+        // ХАРДКОРНАЯ ПРИВЯЗКА ФОТО (Больше никаких undefined)
+        let photoName = "";
+        if (herName.toLowerCase().includes("ульяна") || herName.toLowerCase().includes("ульян")) {
+            photoName = "photo_ulyana.jpg";
+        } else if (herName.toLowerCase().includes("яна")) {
+            photoName = "photo_yana.jpg";
+        } else {
+            // Если имя другое, просто пробуем использовать его как есть (без русских букв)
+            photoName = "photo_" + herName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + ".jpg";
+        }
+
+        if (herName !== "красотка" && photoName) {
             memoryPhoto.src = photoName; 
             
             memoryPhoto.onerror = () => { 
