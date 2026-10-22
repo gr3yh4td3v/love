@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { herName = decodeURIComponent(rawName); } catch (e) { herName = rawName; }
     }
 
-    // Перевод русских букв в латиницу (Ульяна -> ulyana)
+    // Переводчик (Ульяна -> ulyana)
     function translit(str) {
         const ru = "А-а-Б-б-В-в-Г-г-Д-д-Е-е-Ё-ё-Ж-ж-З-з-И-и-Й-й-К-к-Л-л-М-м-Н-н-О-о-П-п-Р-р-С-с-Т-т-У-у-Ф-ф-Х-х-Ц-ц-Ч-ч-Ш-ш-Щ-щ-Ь-ь-Ы-ы-Ъ-ъ-Э-э-Ю-ю-Я-я".split("-");
         const en = "A-a-B-b-V-v-G-g-D-d-E-e-E-e-Zh-zh-Z-z-I-i-I-i-K-k-L-l-M-m-N-n-O-o-P-p-R-r-S-s-T-t-U-u-F-f-Kh-kh-Ts-ts-Ch-ch-Sh-sh-Shch-shch--Y-y--E-e-Yu-yu-Ya-ya".split("-");
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = ru.indexOf(char);
             res += (index !== -1) ? en[index] : char;
         }
-        return res.toLowerCase().replace(/\s+/g, ''); 
+        return res.toLowerCase().replace(/[^a-z0-9]/g, ''); // Оставляем только буквы и цифры
     }
 
     function sendTelegramMessage(text) {
@@ -269,19 +269,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('question').style.display = 'none';
         document.getElementById('buttons').style.display = 'none';
-        message.style.display = 'none'; // Прячем "Кнопка нет сдалась"
+        message.style.display = 'none';
 
         finalScreen.style.display = 'block';
         poemContainer.innerHTML = `Ты буквально словила джекпот.<br>А может немного не тот...<br>Возможно, я сделал ошибку.<br>Мы узнаем это через недельку 😉`;
 
-        // УЛУЧШЕННАЯ ЗАГРУЗКА ФОТО
+        // ЖЕЛЕЗОБЕТОННАЯ ЗАГРУЗКА ФОТО (photo_ulyana.jpg)
         if (herName !== "красотка") {
-            const photoName = translit(herName).trim() + ".jpg"; 
-            memoryPhoto.src = photoName + "?v=" + Date.now(); // ?v=... сбрасывает кэш, чтобы фото точно загрузилось
+            const photoName = "photo_" + translit(herName) + ".jpg"; 
+            memoryPhoto.src = photoName; 
             
             memoryPhoto.onerror = () => { 
                 memoryPhoto.style.display = 'none'; 
-                console.log("Фото не найдено:", memoryPhoto.src);
+                console.log("Фото не найдено по ссылке:", memoryPhoto.src);
             };
             memoryPhoto.onload = () => { 
                 memoryPhoto.style.display = 'block';
