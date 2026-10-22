@@ -12,14 +12,10 @@
     <div class="bg-layer" id="bg-warm"></div>
     <canvas id="particles"></canvas>
 
-    <!-- АУДИО -->
+    <!-- АУДИО (твои голосовые сообщения) -->
     <audio id="audio-test" loop><source src="music_test.mp3" type="audio/mpeg"></audio>
     <audio id="audio-love" loop><source src="music_love.mp3" type="audio/mpeg"></audio>
-    
-    <!-- Твой голос до признания -->
     <audio id="audio-voice"><source src="voice.mp3" type="audio/mpeg"></audio>
-    
-    <!-- Твой голос после кнопки Да -->
     <audio id="audio-voice-yes"><source src="voice_yes.mp3" type="audio/mpeg"></audio>
 
     <main class="card" id="card">
@@ -28,7 +24,15 @@
             <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
             <h2 id="q-counter">Вопрос 1 из 3</h2>
             <h1 id="q-text">Загрузка...</h1>
+            
+            <!-- Контейнер для кнопок -->
             <div id="answers" class="buttons"></div>
+            
+            <!-- Поле для своего варианта ответа -->
+            <div id="custom-answer-container" style="display: none; margin-top: 15px; width: 100%;">
+                <input type="text" id="custom-answer-input" placeholder="Напиши свой вариант..." style="width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-family: inherit; font-size: 16px; outline: none;">
+                <button id="custom-answer-submit" style="margin-top: 10px; padding: 10px 20px; border-radius: 50px; border: none; background: #ff4d6d; color: white; font-weight: bold; cursor: pointer; width: 100%;">Отправить</button>
+            </div>
         </div>
 
         <!-- ЭКРАН 2: ПРИЗНАНИЕ -->
