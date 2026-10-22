@@ -45,6 +45,18 @@
                 <button id="no-btn" class="btn no">Нет</button>
             </div>
             
+            <!-- ФИНАЛЬНЫЙ ЭКРАН (появляется после ДА) -->
+            <div id="final-screen" style="display: none; margin-top: 20px;">
+                <!-- Стих -->
+                <div id="poem-container" style="font-size: 18px; font-family: Comfortaa; color: #4a2c4a; line-height: 1.8; margin-bottom: 20px;"></div>
+                
+                <!-- Фото -->
+                <img id="memory-photo" src="" alt="Наше фото" style="display: none; width: 100%; max-height: 300px; object-fit: cover; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-bottom: 20px; border: 3px solid white;">
+                
+                <!-- Кнопка выбора даты -->
+                <button id="date-btn" class="btn yes" style="display: none; width: 100%; padding: 15px; font-size: 16px; background: #a18cd1; margin-top: 10px;">📅 Выбрать дату свидания</button>
+            </div>
+            
             <p id="message" class="message"></p>
         </div>
     </main>
