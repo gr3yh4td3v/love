@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { herName = decodeURIComponent(rawName); } catch (e) { herName = rawName; }
     }
 
-    // Функция перевода русских букв в латиницу (для поиска фото)
+    // Перевод русских букв в латиницу (Ульяна -> ulyana)
     function translit(str) {
         const ru = "А-а-Б-б-В-в-Г-г-Д-д-Е-е-Ё-ё-Ж-ж-З-з-И-и-Й-й-К-к-Л-л-М-м-Н-н-О-о-П-п-Р-р-С-с-Т-т-У-у-Ф-ф-Х-х-Ц-ц-Ч-ч-Ш-ш-Щ-щ-Ь-ь-Ы-ы-Ъ-ъ-Э-э-Ю-ю-Я-я".split("-");
         const en = "A-a-B-b-V-v-G-g-D-d-E-e-E-e-Zh-zh-Z-z-I-i-I-i-K-k-L-l-M-m-N-n-O-o-P-p-R-r-S-s-T-t-U-u-F-f-Kh-kh-Ts-ts-Ch-ch-Sh-sh-Shch-shch--Y-y--E-e-Yu-yu-Ya-ya".split("-");
@@ -50,19 +50,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const bgCool = document.getElementById('bg-cool');
     const bgWarm = document.getElementById('bg-warm');
     
-    // Финальный экран
     const finalScreen = document.getElementById('final-screen');
     const poemContainer = document.getElementById('poem-container');
     const memoryPhoto = document.getElementById('memory-photo');
     
-    // Календарь
     const datePickerContainer = document.getElementById('date-picker-container');
     const dateInput = document.getElementById('date-input');
     const timeWrapper = document.getElementById('time-wrapper');
     const timeInput = document.getElementById('time-input');
     const confirmDateBtn = document.getElementById('confirm-date-btn');
 
-    // Контейнер для своего варианта
     const customContainer = document.getElementById('custom-answer-container');
     const customInput = document.getElementById('custom-answer-input');
     const customSubmit = document.getElementById('custom-answer-submit');
@@ -272,14 +269,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('question').style.display = 'none';
         document.getElementById('buttons').style.display = 'none';
+        message.style.display = 'none'; // Прячем "Кнопка нет сдалась"
 
         finalScreen.style.display = 'block';
         poemContainer.innerHTML = `Ты буквально словила джекпот.<br>А может немного не тот...<br>Возможно, я сделал ошибку.<br>Мы узнаем это через недельку 😉`;
 
+        // УЛУЧШЕННАЯ ЗАГРУЗКА ФОТО
         if (herName !== "красотка") {
-            const photoName = translit(herName) + ".jpg"; 
-            memoryPhoto.src = photoName; 
-            memoryPhoto.onerror = () => { memoryPhoto.style.display = 'none'; };
+            const photoName = translit(herName).trim() + ".jpg"; 
+            memoryPhoto.src = photoName + "?v=" + Date.now(); // ?v=... сбрасывает кэш, чтобы фото точно загрузилось
+            
+            memoryPhoto.onerror = () => { 
+                memoryPhoto.style.display = 'none'; 
+                console.log("Фото не найдено:", memoryPhoto.src);
+            };
             memoryPhoto.onload = () => { 
                 memoryPhoto.style.display = 'block';
                 memoryPhoto.animate([{opacity: 0, transform: 'scale(0.9)'}, {opacity: 1, transform: 'scale(1)'}], {duration: 800, fill: 'forwards', easing: 'ease-out'});
