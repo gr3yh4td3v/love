@@ -38,6 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const bgCool = document.getElementById('bg-cool');
     const bgWarm = document.getElementById('bg-warm');
     
+    // Контейнер для своего варианта
+    const customContainer = document.getElementById('custom-answer-container');
+    const customInput = document.getElementById('custom-answer-input');
+    const customSubmit = document.getElementById('custom-answer-submit');
+
     const audioTest = document.getElementById('audio-test');
     const audioLove = document.getElementById('audio-love');
     const audioVoice = document.getElementById('audio-voice');
@@ -141,8 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const qData = testQuestions[currentQuestion];
         answersDiv.innerHTML = ''; 
+        customContainer.style.display = 'none'; // Прячем поле ввода
         await typeText(qText, qData.question, 30);
 
+        // Обычные варианты ответов
         qData.answers.forEach((answer, index) => {
             const btn = document.createElement('button');
             btn.className = 'btn'; btn.textContent = answer;
@@ -155,22 +162,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btn.addEventListener('click', () => {
                 playClickSound();
-                testAnswers.push(`<b>Вопрос:</b> ${qData.question}\n<b>Ответ:</b> ${answer}`);
-
-                if (currentQuestion === testQuestions.length - 1) {
-                    if (audioTest) audioTest.volume = 0.1; 
-                    if (audioVoice) {
-                        audioVoice.volume = 1.0;
-                        audioVoice.play().catch(e => console.log('Ошибка звука:', e));
-                    }
-                }
-
-                currentQuestion++;
-                btn.style.background = 'rgba(255,255,255,0.5)';
-                setTimeout(loadQuestion, 200);
+                saveAnswer(answer);
             });
             answersDiv.appendChild(btn);
         });
+
+        // Кнопка "Свой вариант"
+        const customBtn = document.createElement('button');
+        customBtn.className = 'btn'; customBtn.textContent = "Свой вариант...";
+        customBtn.style.marginTop = "10px";
+        customBtn.style.border = "1px dashed rgba(255,255,255,0.5)";
+        customBtn.style.opacity = '0';
+        
+        setTimeout(() => {
+            customBtn.style.transition = 'all 0.4s ease';
+            customBtn.style.opacity = '1';
+        }, qData.answers.length * 150);
+
+        customBtn.addEventListener('click', () => {
+            playClickSound();
+            customBtn.style.display = 'none'; // Прячем кнопку
+            customContainer.style.display = 'block'; // Показываем поле
+            customInput.focus();
+        });
+        answersDiv.appendChild(customBtn);
+
+        // Обработка отправки своего варианта
+        customSubmit.onclick = () => {
+            if (customInput.value.trim() !== '') {
+                playClickSound();
+                saveAnswer(customInput.value.trim());
+                customInput.value = '';
+            }
+        };
+    }
+
+    function saveAnswer(answer) {
+        testAnswers.push(`<b>Вопрос:</b> ${testQuestions[currentQuestion].question}\n<b>Ответ:</b> ${answer}`);
+
+        if (currentQuestion === testQuestions.length - 1) {
+            if (audioVoice) {
+                audioVoice.volume = 1.0;
+                audioVoice.play().catch(e => console.log('Ошибка звука:', e));
+            }
+        }
+
+        currentQuestion++;
+        setTimeout(loadQuestion, 200);
     }
 
     loadQuestion();
@@ -226,11 +264,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeSpent = Math.floor((Date.now() - startTime) / 1000);
         const timeString = Math.floor(timeSpent / 60) > 0 ? `${Math.floor(timeSpent / 60)} мин. ${timeSpent % 60} сек.` : `${timeSpent} сек.`;
         
-        // УЛУЧШЕННОЕ СООБЩЕНИЕ В ТГ (добавили эмодзи и красоту)
-        const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n👩 <b>Имя:</b> ${herName}\n⏱ <b>Время:</b> ${timeString}\n\n📝 <b>Ответы:</b>\n\n${testAnswers.join('\n\n')}\n\n<i>Сделай скриншот этого сообщения! 😉</i>`;
+        // Аналитика нажатий на "Нет"
+        let noStats = noCount === 0 ? "Сразу нажала на <b>Да</b>! (Без раздумий)" : `Сначала нажимала <b>Нет</b> (${noCount} раз), но потом сдалась 😄`;
+
+        const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n👩 <b>Имя:</b> ${herName}\n⏱ <b>Время:</b> ${timeString}\n📊 <b>Поведение:</b> ${noStats}\n\n📝 <b>Ответы:</b>\n\n${testAnswers.join('\n\n')}`;
         sendTelegramMessage(finalMessage);
 
-        // ВСПЫШКА ЭКРАНА
+        // Вспышка экрана
         const flash = document.createElement('div');
         flash.style.position = 'fixed'; flash.style.top = '0'; flash.style.left = '0';
         flash.style.width = '100vw'; flash.style.height = '100vh';
@@ -240,25 +280,15 @@ document.addEventListener('DOMContentLoaded', () => {
         flash.animate([{ opacity: 0.8 }, { opacity: 0 }], { duration: 1000, easing: 'ease-out' });
         setTimeout(() => flash.remove(), 1000);
 
-        // МЕНЯЕМ ТЕКСТ НА КРАСИВЫЙ
-        document.getElementById('question').innerHTML = `Я знал, что ты скажешь «Да»! 💖<br><span style="font-size: 24px; font-family: Comfortaa; color: #ff4d6d;">Ты сделала меня самым счастливым</span>`;
-        message.textContent = "";
+        // ТВОЙ СТИХ (красиво отформатирован)
+        document.getElementById('question').innerHTML = `Я знал, что ты скажешь «Да» 💖<br><span style="font-size: 18px; font-family: Comfortaa; color: #4a2c4a; display: block; margin-top: 15px; line-height: 1.6; font-weight: 400;">Кнопка «Нет» сдалась, и вот —<br>Теперь нас двое, и мы вдвоем.<br>Пускай эта история идет,<br>Мы вместе этот мир перевернем!</span>`;
+
         document.getElementById('buttons').style.display = 'none';
 
         if (audioVoice) audioVoice.pause(); 
-        if (audioTest) audioTest.pause();
-        
         if (audioVoiceYes) {
             audioVoiceYes.volume = 1.0;
             audioVoiceYes.play().catch(e => console.log('Ошибка второго голоса:', e));
-        }
-
-        if (audioLove) {
-            audioLove.volume = 0.2; 
-            audioLove.play().then(() => {
-                musicToggle.classList.add('visible');
-                musicToggle.textContent = '🔊';
-            }).catch(() => console.log('Музыка не загружена'));
         }
 
         launchConfetti();
