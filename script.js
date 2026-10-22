@@ -264,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeSpent = Math.floor((Date.now() - startTime) / 1000);
         const timeString = Math.floor(timeSpent / 60) > 0 ? `${Math.floor(timeSpent / 60)} мин. ${timeSpent % 60} сек.` : `${timeSpent} сек.`;
         
-        // Аналитика нажатий на "Нет"
         let noStats = noCount === 0 ? "Сразу нажала на <b>Да</b>! (Без раздумий)" : `Сначала нажимала <b>Нет</b> (${noCount} раз), но потом сдалась 😄`;
 
         const finalMessage = `💖 <b>ОНА НАЖАЛА «ДА»!</b> 💖\n\n👩 <b>Имя:</b> ${herName}\n⏱ <b>Время:</b> ${timeString}\n📊 <b>Поведение:</b> ${noStats}\n\n📝 <b>Ответы:</b>\n\n${testAnswers.join('\n\n')}`;
@@ -280,8 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
         flash.animate([{ opacity: 0.8 }, { opacity: 0 }], { duration: 1000, easing: 'ease-out' });
         setTimeout(() => flash.remove(), 1000);
 
-        // ТВОЙ СТИХ (красиво отформатирован)
-        document.getElementById('question').innerHTML = `Я знал, что ты скажешь «Да» 💖<br><span style="font-size: 18px; font-family: Comfortaa; color: #4a2c4a; display: block; margin-top: 15px; line-height: 1.6; font-weight: 400;">Кнопка «Нет» сдалась, и вот —<br>Теперь нас двое, и мы вдвоем.<br>Пускай эта история идет,<br>Мы вместе этот мир перевернем!</span>`;
+        // ТВОЙ НОВЫЙ ТЕКСТ (Джекпот)
+        document.getElementById('question').innerHTML = `Я знал, что ты скажешь «Да» 💖<br><span style="font-size: 18px; font-family: Comfortaa; color: #4a2c4a; display: block; margin-top: 15px; line-height: 1.8; font-weight: 400;">Ты буквально словила джекпот.<br>А может немного не тот...<br>Возможно, я сделал ошибку.<br>Мы узнаем это через недельку 😉</span>`;
 
         document.getElementById('buttons').style.display = 'none';
 
